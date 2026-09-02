@@ -23,7 +23,7 @@ public class Methods {
         IO.println("======================");
     }
 
-    static void printShutDownMessage() {
+    public static void printShutDownMessage() {
         IO.println("Shutting down application");
         IO.println("Thanks for your support!");
     }

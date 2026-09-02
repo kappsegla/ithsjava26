@@ -2,7 +2,7 @@ package com.example.java26;
 
 public class Logic {
     static void main() {
-        int value = -1;
+        int value = 10;
         if (greaterThanZero(value) && lessThanTen(value))
             IO.println("Sant");
     }

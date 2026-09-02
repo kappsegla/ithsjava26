@@ -57,7 +57,7 @@ public class InsuranceCalculator {
         return accidentAdjustment;
     }
 
-    public static double getMileageAdjustment(int annualMileage, int basePrice){
+    private static double getMileageAdjustment(int annualMileage, int basePrice){
         if (annualMileage < 1000)
             return basePrice * -0.05;
         else if (annualMileage > 2000)

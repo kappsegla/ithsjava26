@@ -2,11 +2,16 @@ package com.example.java26;
 
 public class Methods {
     static void main() {
+        final boolean DEBUG = false;
         printGreeting();
 
         int tal1 = readIntegerFromKeyboard();
+        if (DEBUG)
+            IO.println("Log: tal1=" + tal1);
         int tal2 = readIntegerFromKeyboard();
-        int sum = add(tal1,tal2);
+        if (DEBUG)
+            IO.println("Log: tal2=" + tal2);
+        int sum = add(tal1, tal2);
         IO.println("Summan blir: " + sum);
 
         printShutDownMessage();

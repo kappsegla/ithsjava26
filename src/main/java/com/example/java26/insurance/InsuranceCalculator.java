@@ -29,14 +29,13 @@ public class InsuranceCalculator {
     }
 
     private static int getBasePrice(String model) {
-        int basePrice = switch (model) {
+        return switch (model) {
             case "tesla", "vw" -> 3500;
             case "volvo" -> 4000;
             case "kia" -> 3000;
             case "porsche" -> 5000;
             default -> 0;
         };
-        return basePrice;
     }
 
     private static double getExperienceAdjustment(int yearsOfDrivingExperience, int basePrice) {

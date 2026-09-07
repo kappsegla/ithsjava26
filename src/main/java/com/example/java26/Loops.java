@@ -22,7 +22,7 @@ public class Loops {
             IO.println(10 - i);
         }
 
-        for( char c = 'a'; c <= 'z'; c++ ) {
+        for (char c = 'a'; c <= 'z'; c++) {
             IO.println(c + "(" + (int) c + ")");
         }
 
@@ -31,21 +31,20 @@ public class Loops {
         }
 
         int i = 0;
-        while(i < 10) {
+        while (i < 10) {
             IO.println(i);
             i++;
         }
 
-        for(int j = 0; j < 10; j++)
-        {
-            if( j % 2 == 0) {
+        for (int j = 0; j < 10; j++) {
+            if (j % 2 == 0) {
                 continue;
-            }
-            else if(j > 5)
+            } else if (j > 5)
                 break;
             System.out.println(j);
         }
 
+        for (int j = 0; j < 10; j++) ;  //Kommer köras även utan statements
 
 
     }

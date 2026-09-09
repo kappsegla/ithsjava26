@@ -2,9 +2,10 @@ package com.example.java26.week3;
 
 public class PackageSystem {
     static void main() {
-        Box[] boxes = new Box[10];
+        Parcel[] parcels = new Parcel[10];
+        int parcelCount = 0;
 
-        while (true) {
+        while (parcelCount < 10) {
             //Registrera paket och deras dimensioner
             int width = Integer.parseInt(IO.readln("Please enter the width of the box:"));
             int height = Integer.parseInt(IO.readln("Please enter the height of the box:"));
@@ -20,8 +21,9 @@ public class PackageSystem {
             int price = calculateShippingPrice(box);
             IO.println("Price is " + price);
 
-
             //Lagra kostnaden tillsammans med paketets information?? Får inte uppdatera Box..
+            Parcel parcel = new Parcel(box, price);
+            parcels[parcelCount++] = parcel;
         }
     }
 

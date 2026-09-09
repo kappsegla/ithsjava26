@@ -1,5 +1,7 @@
 package com.example.java26.week3;
 
+import java.util.ArrayList;
+
 public class EarlyVotingRegister {
 
     static void main() {
@@ -25,8 +27,8 @@ public class EarlyVotingRegister {
     }
 
     static boolean isEnvelopeNumberUnique(int envelopeNumber, Vote[] votes) {
-        for (int i = 0; i < votes.length; i++) {
-            if (votes[i] != null && envelopeNumber == votes[i].eNumber()) //Must check for null to avoid NullPointerException
+        for (Vote vote : votes) {  //Enhanced for loop
+            if (vote != null && envelopeNumber == vote.eNumber()) //Must check for null to avoid NullPointerException
                 return false;
         }
         return true;

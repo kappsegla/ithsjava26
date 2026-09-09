@@ -5,7 +5,7 @@ public class PackageSystem {
         Parcel[] parcels = new Parcel[10];
         int parcelCount = 0;
 
-        while (parcelCount < 10) {
+        while (parcelCount < parcels.length) {
             //Registrera paket och deras dimensioner
             int width = Integer.parseInt(IO.readln("Please enter the width of the box:"));
             int height = Integer.parseInt(IO.readln("Please enter the height of the box:"));

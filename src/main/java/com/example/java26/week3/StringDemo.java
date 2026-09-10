@@ -11,8 +11,8 @@ public class StringDemo {
         IO.println(duck == duck2);
         String duckFromKeyBoard = IO.readln("Enter a duck name:");
         //To compare the characters in two different String objects use equals method
-        IO.println("Compare from keyboard: " + (duck.equals( duckFromKeyBoard)));
-        IO.println("Compare from keyboard: " + (duck.compareTo( duckFromKeyBoard) == 0));
+        IO.println("Compare from keyboard: " + (duck.equals(duckFromKeyBoard)));
+        IO.println("Compare from keyboard: " + (duck.compareTo(duckFromKeyBoard) == 0));
 
         IO.println(name);
         var lowerCase = name.toLowerCase();
@@ -26,12 +26,12 @@ public class StringDemo {
 
         String choice = IO.readln("Enter e or p");
         switch (choice.toLowerCase()) {
-            case "e"-> IO.println("You picked eternal pain");
-            case "p"-> IO.println("You picked pain");
+            case "e" -> IO.println("You picked eternal pain");
+            case "p" -> IO.println("You picked pain");
         }
 
-        if( choice.isEmpty() ) IO.println("You picked empty pain");
-        if( choice.startsWith("e") )
+        if (choice.isEmpty()) IO.println("You picked empty pain");
+        if (choice.startsWith("e"))
             IO.println("Your choice starts with an e");
 
 

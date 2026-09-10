@@ -2,7 +2,7 @@ package com.example.java26.exercises.week3;
 
 public class Exercise5 {
     static void main() {
-        int secretNumber = 50;
+        int secretNumber = (int)(Math.random()*100 + 1);
         int guess = 0;
         int guessCount = 0;
 

@@ -35,10 +35,10 @@ public class Calc {
                 sum += Character.getNumericValue(numbers.charAt(i));
         }
         //Alt without loop
-//        sum = numbers.chars()
-//                .filter(Character::isDigit)
-//                .map(Character::getNumericValue)
-//                .sum();
+        sum = numbers.chars()
+                .filter(Character::isDigit)
+                .map(Character::getNumericValue)
+                .sum();
         return sum;
     }
 }

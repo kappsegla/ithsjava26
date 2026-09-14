@@ -3,16 +3,28 @@ package com.example.java26.oop;
 public class Rectangle {
     private int width;   //Field/Fält
     private int height;  //private access, only code in this class
-    private Color color;  //Reference to another object, Composition
+    private Color color;  //Reference to another object, Composition. Defaults to null
 
-    public Rectangle(){
+    public Rectangle() {
         width = 1;
         height = 1;
+        color = new Color(0, 0, 0);
     }
 
-    public Rectangle(int w, int h){
-        width = w;
-        height = h;
+    public Rectangle(int width, int height) {
+        if (width < 1 || height < 1)
+            throw new IllegalArgumentException();
+        this.width = width;
+        this.height = height;
+        this.color = new Color(0, 0, 0);
+    }
+
+    public Rectangle(int width, int height, Color color) {
+        if (width < 1 || height < 1 || color == null)
+            throw new IllegalArgumentException();
+        this.width = width;
+        this.height = height;
+        this.color = color;
     }
 
     public int getWidth() {
@@ -20,6 +32,8 @@ public class Rectangle {
     }
 
     public void setWidth(int width) {
+        if (width < 1)
+            throw new IllegalArgumentException();
         this.width = width;
     }
 
@@ -28,6 +42,8 @@ public class Rectangle {
     }
 
     public void setHeight(int height) {
+        if( height < 1)
+            throw new IllegalArgumentException();
         this.height = height;
     }
 
@@ -36,7 +52,13 @@ public class Rectangle {
     }
 
     public void setColor(Color color) {
+        if( color == null)
+            throw new IllegalArgumentException();
         this.color = color;
+    }
+
+    public int area() {
+        return width * height;
     }
 }
 

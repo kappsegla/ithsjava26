@@ -12,11 +12,13 @@ public class Rectangle {
     }
 
     public Rectangle(int width, int height) {
-        if (width < 1 || height < 1)
-            throw new IllegalArgumentException();
-        this.width = width;
-        this.height = height;
-        this.color = new Color(0, 0, 0);
+        //Constructor chaining. Moves all validation to constructor that takes all parameters
+        this(width, height, new Color(0, 0, 0));
+//        if (width < 1 || height < 1)
+//            throw new IllegalArgumentException();
+//        this.width = width;
+//        this.height = height;
+//        this.color = new Color(0, 0, 0);
     }
 
     public Rectangle(int width, int height, Color color) {
@@ -25,6 +27,16 @@ public class Rectangle {
         this.width = width;
         this.height = height;
         this.color = color;
+    }
+
+    //Copy constructor
+    public Rectangle(Rectangle rectangle) {
+        //this() calls another constructor
+        this(rectangle.width, rectangle.height, rectangle.color);
+        //Alt: set each field individually
+//        this.width = rectangle.width;
+//        this.height = rectangle.height;
+//        this.color = rectangle.color;
     }
 
     public int getWidth() {
@@ -59,6 +71,14 @@ public class Rectangle {
 
     public int area() {
         return width * height;
+    }
+
+    public Rectangle copyOf(Rectangle orig) {
+        return new Rectangle(orig);
+    }
+
+    public Rectangle copyOf() {
+        return new Rectangle(this);
     }
 }
 

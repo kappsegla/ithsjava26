@@ -15,6 +15,18 @@ public class ShapeDemo {
         Color color = rectangle.getColor();
         IO.println(color.red());
 
+        Rectangle rectangle4 = new Rectangle(rectangle2);
+        IO.println(rectangle2.getWidth());
+        IO.println(rectangle4.getWidth());
+        rectangle4.setWidth(50);
+        IO.println(rectangle2.getWidth());
+        IO.println(rectangle4.getWidth());
+
+        Rectangle rectangle5 = rectangle2.copyOf(rectangle2);
+        Rectangle rectangle6 = rectangle2.copyOf();
+
+
+
 
     }
 }

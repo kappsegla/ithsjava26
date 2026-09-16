@@ -13,6 +13,5 @@ Lägg till metoder för att:
 - Lägg till ETT värde sist
 - Hämta värdet
 - Ta bort sista värdet
-
 - Hantera när arrayen blir full
-- Ta bort ett värde på index
+- Ta bort ett värde på en plats angiven med index

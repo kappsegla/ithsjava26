@@ -1,20 +1,50 @@
 package com.example.java26.oop;
 
+import java.util.Arrays;
+
 public class MultipleIntegers {
     private int[] values = new int[10];
     private int counter = 0;
 
-    public void add(int value){
-        //Todo: Handle the case where values is full. counter > values.length - 1
+    public void add(int value) {
+        if (counter >= values.length) {
+            growArray();
+        }
         values[counter++] = value;
     }
 
-    public int getValue(int index){
+    public void addFirst(int value) {
+
+    }
+
+    private void growArray() {
+        values = Arrays.copyOf(values, values.length * 2);
+
+//        //Ny större array
+//        int[] temp = new int[values.length * 2];
+//        //Kopiera från original arrayen till nya större
+//        for (int i = 0; i < values.length; i++) {
+//            temp[i] = values[i];
+//        }
+//        //Sätt values att referera till den nya arrayen
+//        values = temp;
+    }
+
+    public int getValue(int index) {
         //Todo: Error when index is > number of values stored
         return values[index];
     }
 
-    public void removeLast(){
+    public void removeLast() {
+        counter--;
+    }
+
+    public void removeAtIndex(int index) {
+        //Alla värden efter index flyttas ett steg vänster
+        for (int i = index; i < counter - 1; i++) {
+            values[i] = values[i + 1];
+        }
+        //Minska counter med 1
         counter--;
     }
 
@@ -25,15 +55,22 @@ public class MultipleIntegers {
     static void main() {
         MultipleIntegers integers = new MultipleIntegers();
         integers.add(100);
-        integers.add(10);
-        integers.add(10);
+        integers.add(99);
+        integers.add(1);
         integers.add(20);
-        integers.removeLast();
+        integers.add(30);
+        integers.add(5);
+        integers.add(5);
+        integers.add(40);
+        integers.add(20);
+        integers.add(60);
+//        integers.removeLast();
+        integers.removeAtIndex(1);
         integers.add(25);
         IO.println(integers.getValue(0));
         IO.println(integers.getValue(3));
-     //   IO.println(integers.getValue(9));  //Nothing stored here
-     //   IO.println(integers.getValue(10)); //Gives error...
+        //   IO.println(integers.getValue(9));  //Nothing stored here
+        //   IO.println(integers.getValue(10)); //Gives error...
 
         for (int i = 0; i < integers.size(); i++) {
             IO.println(integers.getValue(i));

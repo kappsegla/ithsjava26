@@ -15,3 +15,4 @@ Lägg till metoder för att:
 - Ta bort sista värdet
 - Hantera när arrayen blir full
 - Ta bort ett värde på en plats angiven med index
+- Lägg till Ett värde först

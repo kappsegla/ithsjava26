@@ -14,7 +14,15 @@ public class MultipleIntegers {
     }
 
     public void addFirst(int value) {
-
+        if (counter >= values.length) {
+            growArray();
+        }
+        //Flytta alla värden ett steg höger
+        for (int i = counter - 1; i >= 0; i--) {
+            values[i + 1] = values[i];
+        }
+        values[0] = value;
+        counter++;
     }
 
     private void growArray() {
@@ -66,9 +74,10 @@ public class MultipleIntegers {
         integers.add(60);
 //        integers.removeLast();
         integers.removeAtIndex(1);
+        integers.addFirst(99);
         integers.add(25);
-        IO.println(integers.getValue(0));
-        IO.println(integers.getValue(3));
+//        IO.println(integers.getValue(0));
+//        IO.println(integers.getValue(3));
         //   IO.println(integers.getValue(9));  //Nothing stored here
         //   IO.println(integers.getValue(10)); //Gives error...
 

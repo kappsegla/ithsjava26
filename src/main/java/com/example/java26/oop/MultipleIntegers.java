@@ -14,6 +14,10 @@ public class MultipleIntegers {
         return values[index];
     }
 
+    public void removeLast(){
+        counter--;
+    }
+
     public int size() {
         return counter;
     }
@@ -24,7 +28,8 @@ public class MultipleIntegers {
         integers.add(10);
         integers.add(10);
         integers.add(20);
-        integers.add(0);
+        integers.removeLast();
+        integers.add(25);
         IO.println(integers.getValue(0));
         IO.println(integers.getValue(3));
      //   IO.println(integers.getValue(9));  //Nothing stored here

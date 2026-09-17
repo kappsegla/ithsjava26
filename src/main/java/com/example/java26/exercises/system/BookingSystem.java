@@ -9,6 +9,10 @@ public class BookingSystem {
         office.addRoom(new Room("Forest",20));
 
         Room room = office.findAvailableRoom(5);
+        if(room == null) {
+            IO.println("Room not found");
+            return;
+        }
         IO.println("Available Room: " + room.getRoomName());
         if( room.book() )
             IO.println("Booking Successful");
@@ -16,6 +20,10 @@ public class BookingSystem {
             IO.println("Booking Failed");
 
         room = office.findAvailableRoom(10);
+        if(room == null) {
+            IO.println("Room not found");
+            return;
+        }
         IO.println("Available Room: " + room.getRoomName());
         if( room.book() )
             IO.println("Booking Successful");

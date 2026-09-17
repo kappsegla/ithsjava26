@@ -87,4 +87,23 @@ public class Triangle { //Uppgift 1.2
             return "Oliksidig triangel";
         }
     }
+
+//    public TriangleType triangleType() {
+//        if(!isValidTriangle()) {
+//            return TriangleType.Ogiltig;
+//        } else if (sideA == sideB && sideA == sideC) {
+//            return TriangleType.Liksidig;
+//        } else if (sideA == sideB || sideA == sideC || sideB == sideC) {
+//            return TriangleType.Likbent;
+//        } else {
+//            return TriangleType.Oliksidig;
+//        }
+//    }
+}
+
+enum TriangleType {
+    Ogiltig,
+    Liksidig,
+    Likbent,
+    Oliksidig
 }

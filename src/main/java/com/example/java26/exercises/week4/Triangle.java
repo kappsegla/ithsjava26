@@ -30,6 +30,11 @@ public class Triangle { //Uppgift 1.2
         this.sideC = original.sideC;
     }
 
+    public static Triangle copyOf(Triangle original) {
+        return new Triangle(original);
+    }
+
+
     static void main() {
         Triangle triangle = new Triangle(3.0,4.0,5.0);
 //        triangle.setSideA(3.0);
@@ -61,6 +66,7 @@ public class Triangle { //Uppgift 1.2
 
         Triangle triangle5 = new Triangle(10);
         Triangle triangle6 = new Triangle(triangle5);
+        Triangle triangle7 = Triangle.copyOf(triangle6);
     }
 
     public double getSideA() { //getMetoder ska inte vara static static kan inte läsa instansfält

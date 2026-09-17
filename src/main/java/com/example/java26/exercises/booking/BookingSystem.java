@@ -3,11 +3,7 @@ package com.example.java26.exercises.booking;
 public class BookingSystem {
 
     static void main() {
-        Office office = new Office();
-        office.addRoom(new Room("The Panic Room", 4));
-        office.addRoom(new Room("404 Not Found", 10));
-        office.addRoom(new Room("The Batcave", 8));
-        office.addRoom(new Room("The Death Star", 20));
+        Office office = initialize();
 
         String menu = """
                 Booking system
@@ -31,7 +27,17 @@ public class BookingSystem {
         }
     }
 
+    private static Office initialize() {
+        Office office = new Office();
+        office.addRoom(new Room("The Panic Room", 4));
+        office.addRoom(new Room("404 Not Found", 10));
+        office.addRoom(new Room("The Batcave", 8));
+        office.addRoom(new Room("The Death Star", 20));
+        return office;
+    }
+
     private static void listBookedRooms(Office office) {
+
 
     }
 
@@ -41,7 +47,6 @@ public class BookingSystem {
 
     private static void bookARoom(Office office) {
         int capacity = Integer.parseInt(IO.readln("How many seats do you need? "));
-
 
     }
 }

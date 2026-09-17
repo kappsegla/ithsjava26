@@ -5,7 +5,8 @@ public class Triangle { //Uppgift 1.2
     private double sideB;
     private double sideC;
 
-    public Triangle() {}
+    public Triangle() {
+    }
 
     public Triangle(double v, double v1, double v2) {
         this.sideA = v;
@@ -18,13 +19,13 @@ public class Triangle { //Uppgift 1.2
      *
      * @param side the length of all three sides of the triangle
      */
-    public Triangle(double side){
+    public Triangle(double side) {
         this.sideA = side;
         this.sideB = side;
         this.sideC = side;
     }
 
-    public Triangle(Triangle original){
+    public Triangle(Triangle original) {
         this.sideA = original.sideA;
         this.sideB = original.sideB;
         this.sideC = original.sideC;
@@ -36,7 +37,7 @@ public class Triangle { //Uppgift 1.2
 
 
     static void main() {
-        Triangle triangle = new Triangle(3.0,4.0,5.0);
+        Triangle triangle = new Triangle(3.0, 4.0, 5.0);
 //        triangle.setSideA(3.0);
 //        triangle.setSideB(4.0);
 //        triangle.setSideC(5.0);
@@ -67,6 +68,9 @@ public class Triangle { //Uppgift 1.2
         Triangle triangle5 = new Triangle(10);
         Triangle triangle6 = new Triangle(triangle5);
         Triangle triangle7 = Triangle.copyOf(triangle6);
+        triangle7.setSideA(11.0);
+        IO.println("Original sideA: " + triangle6.getSideA());
+        IO.println("Copy sideA: " + triangle7.getSideA());
     }
 
     public double getSideA() { //getMetoder ska inte vara static static kan inte läsa instansfält
@@ -102,7 +106,7 @@ public class Triangle { //Uppgift 1.2
     }
 
     public String triangleType() {
-        if(!isValidTriangle()) {
+        if (!isValidTriangle()) {
             return "Ogiltig triangel";
         } else if (sideA == sideB && sideA == sideC) {
             return "Liksidig triangel";

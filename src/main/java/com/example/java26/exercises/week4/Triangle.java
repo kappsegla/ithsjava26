@@ -13,6 +13,23 @@ public class Triangle { //Uppgift 1.2
         this.sideC = v2;
     }
 
+    /**
+     * Constructs a Triangle where all three sides are equal to the specified side length.
+     *
+     * @param side the length of all three sides of the triangle
+     */
+    public Triangle(double side){
+        this.sideA = side;
+        this.sideB = side;
+        this.sideC = side;
+    }
+
+    public Triangle(Triangle original){
+        this.sideA = original.sideA;
+        this.sideB = original.sideB;
+        this.sideC = original.sideC;
+    }
+
     static void main() {
         Triangle triangle = new Triangle(3.0,4.0,5.0);
 //        triangle.setSideA(3.0);
@@ -42,6 +59,8 @@ public class Triangle { //Uppgift 1.2
         IO.println("Perimeter: " + triangle4.perimeter());
         IO.println("Type: " + triangle4.triangleType());
 
+        Triangle triangle5 = new Triangle(10);
+        Triangle triangle6 = new Triangle(triangle5);
     }
 
     public double getSideA() { //getMetoder ska inte vara static static kan inte läsa instansfält

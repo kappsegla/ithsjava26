@@ -49,7 +49,8 @@ public class Character {
 
         //Use lifesaver
         mage.heal(500);
-        IO.println("You used your lifesaver, your health is now  " + mage.getHealth() + ". You awakened at the nearest camp.");
+        IO.println("You used your lifesaver, your health is now  "
+                + mage.getHealth()
+                + ". You awakened at the nearest camp.");
     }
-
 }

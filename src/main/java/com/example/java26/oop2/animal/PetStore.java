@@ -21,10 +21,13 @@ public class PetStore {
         mammals.add(new Puppy());
 
         for (Mammal mammal : mammals) {
-//            if (mammal instanceof Puppy puppy) {
-//                puppy.play();
-//            }
+            if (mammal instanceof Puppy puppy) {
+                puppy.play();
+            }
             IO.println(mammal.makeSound());
         }
+
+       Puppy pet = new Puppy();
+
     }
 }

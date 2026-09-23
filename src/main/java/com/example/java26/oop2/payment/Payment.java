@@ -1,17 +1,15 @@
 package com.example.java26.oop2.payment;
 
-public class Payment {
+public abstract class Payment {
     protected double amount;   //Protected allows access from subclasses
 
     public Payment(double amount) {
         this.amount = amount;
     }
 
-    public void process() {
-        IO.println("Payment processing...");
-    }
+    public abstract void process();
 
-    public double getAmount() {
+    public final double getAmount() {
         return amount;
     }
 
@@ -22,7 +20,7 @@ public class Payment {
     }
 }
 
-class CardPayment extends Payment {
+final class CardPayment extends Payment {
     private String cardNumber;
 
     public CardPayment(double amount, CardNumber cardNumber) {
@@ -32,12 +30,11 @@ class CardPayment extends Payment {
 
     @Override
     public void process() {
-        super.process();
         IO.println("Card payment processing... with card number " + this.cardNumber + " and amount " + amount);
     }
 }
 
-class SwishPayment extends Payment {
+final class SwishPayment extends Payment {
     private String phoneNumber;
 
     public SwishPayment(double amount, String phoneNumber) {
@@ -47,7 +44,6 @@ class SwishPayment extends Payment {
 
     @Override
     public void process() {
-        super.process();
         IO.println("Swish payment processing... with phone number " + this.phoneNumber + " and amount " + amount);
     }
 }

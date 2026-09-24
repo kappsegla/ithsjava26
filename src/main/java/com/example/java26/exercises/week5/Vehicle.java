@@ -15,6 +15,17 @@ public abstract class Vehicle {
         return manufacturer;
     }
 
+    public void describeVehicle(){
+        IO.println(" - Manufacturer: " + getManufacturer());
+        IO.println(" - Type: " + this.getClass().getSimpleName());  //Reflection
+        if( this instanceof NoiseMaker noiseMaker){
+            noiseMaker.makeNoise();
+        }
+        if( this instanceof MotorVehicle motorVehicle){
+            motorVehicle.refuel();
+        }
+    }
+
     static void main() {
         var bicycle = new Bicycle("Skeppshult");
         bicycle.goTo("Stockholm");
@@ -24,6 +35,7 @@ public abstract class Vehicle {
         IO.println(car.getManufacturer());
         var motorboat = new Motorboat("Speedboats Inc.", MotorVehicle.FuelType.PETROL);
         motorboat.goTo("Oslo");
+        motorboat.describeVehicle();
         IO.println(motorboat.getManufacturer());
         var sailboat = new Sailboat("X-Yachts");
         sailboat.goTo("Germany");

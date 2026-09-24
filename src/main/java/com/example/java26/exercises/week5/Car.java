@@ -1,9 +1,9 @@
 package com.example.java26.exercises.week5;
 
-public class Car extends Vehicle implements NoiseMaker {
+public class Car extends MotorVehicle implements NoiseMaker {
 
-    public Car(String manufacturer) {
-        super(manufacturer);
+    public Car(String manufacturer, FuelType fuelType) {
+        super(manufacturer, fuelType);
     }
 
     @Override
@@ -14,5 +14,15 @@ public class Car extends Vehicle implements NoiseMaker {
     @Override
     public void makeNoise() {
         IO.println("Vrrrm!");
+    }
+
+    @Override
+    public void refuel() {
+       String message =  switch (getFuelType()) {
+            case ELECTRIC -> "Laddar bilen";
+            case DIESEL -> "Tankar traktorn";
+            case PETROL -> "Tankar bilen med dinosaurie juice";
+        };
+       IO.println(message);
     }
 }

@@ -19,10 +19,10 @@ public abstract class Vehicle {
         var bicycle = new Bicycle("Skeppshult");
         bicycle.goTo("Stockholm");
         IO.println(bicycle.getManufacturer());
-        var car = new Car("Volvo");
+        var car = new Car("Volvo", MotorVehicle.FuelType.ELECTRIC);
         car.goTo("Göteborg");
         IO.println(car.getManufacturer());
-        var motorboat = new Motorboat("Speedboats Inc.");
+        var motorboat = new Motorboat("Speedboats Inc.", MotorVehicle.FuelType.PETROL);
         motorboat.goTo("Oslo");
         IO.println(motorboat.getManufacturer());
         var sailboat = new Sailboat("X-Yachts");

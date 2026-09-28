@@ -31,4 +31,11 @@ class TemperatureConverterTest {
         //Use delta to allow for floating-point precision
         assertEquals(c, temperatureConverter.fahrenheitToCelsius(f), 0.0001);
     }
+
+    @Test
+    @DisplayName("Celsius to Kelvin")
+    void celsiusToKelvin() {
+        assertEquals(273.15, temperatureConverter.celsiusToKelvin(0));
+    }
+
 }

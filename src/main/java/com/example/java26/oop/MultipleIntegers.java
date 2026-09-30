@@ -40,7 +40,9 @@ public class MultipleIntegers {
     }
 
     public int getValue(int index) {
-        //Todo: Error when index is > number of values stored
+        if(index < 0 || index >= counter) {
+            throw new IndexOutOfBoundsException();
+        }
         return values[index];
     }
 
@@ -55,7 +57,8 @@ public class MultipleIntegers {
             values[i] = values[i + 1];
         }
         //Minska counter med 1
-        counter--;
+        if (counter > 0)
+            counter--;
     }
 
     public int size() {

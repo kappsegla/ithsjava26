@@ -19,10 +19,17 @@ public class StringParserTest {
         assertEquals(0, result);
     }
 
+    @Test
+    void oneNumberShouldReturnThatNumber() {
+        StringParser sp = new StringParser();
+        int result = sp.parseAndAdd("1");
+        assertEquals(1, result);
+    }
 
-
-
-
-
-
+    @Test
+    void anotherNumberShouldReturnThatNumber() {
+        StringParser sp = new StringParser();
+        int result = sp.parseAndAdd("2");
+        assertEquals(2, result);
+    }
 }

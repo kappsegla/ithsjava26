@@ -2,6 +2,7 @@ package com.example.java26.cli;
 
 public class StringParser {
     public int parseAndAdd(String s) {
-        return 0;
+        if( s.isEmpty() ) return 0;
+        return Integer.parseInt(s);
     }
 }

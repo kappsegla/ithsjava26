@@ -1,7 +1,5 @@
 package com.example.java26.oop;
 
-import org.w3c.dom.Node;
-
 public class IntegerLinkedList {
     private Node head;
     private int counter;
@@ -36,7 +34,19 @@ public class IntegerLinkedList {
     }
 
     public int getValue(int index) {
-        return 0;
+        checkIndex(index);
+
+        Node current = head;
+        for (int i = 0; i < index; i++) {
+            current = current.next;
+        }
+        return current.value;
+    }
+
+    private void checkIndex(int index) {
+        if (index < 0 || index >= counter) {
+            throw new IndexOutOfBoundsException("Index out of bounds");
+        }
     }
 
     public void removeLast() {

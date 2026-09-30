@@ -10,34 +10,42 @@ public class StringParserTest {
     //"3" -> 3
     //"1,2,3" -> 6
     //null -> 0
-
+    StringParser sp = new StringParser();
 
     @Test
     void emptyStringReturns0() {
-        StringParser sp = new StringParser();
         int result = sp.parseAndAdd("");
         assertEquals(0, result);
     }
 
     @Test
     void oneNumberShouldReturnThatNumber() {
-        StringParser sp = new StringParser();
         int result = sp.parseAndAdd("1");
         assertEquals(1, result);
     }
 
     @Test
     void anotherNumberShouldReturnThatNumber() {
-        StringParser sp = new StringParser();
         int result = sp.parseAndAdd("2");
         assertEquals(2, result);
     }
 
     @Test
     void nullShouldReturn0() {
-        StringParser sp = new StringParser();
         int result = sp.parseAndAdd(null);
         assertEquals(0, result);
+    }
+
+    @Test
+    void splitOnCommaAndSumValues() {
+        int result = sp.parseAndAdd("1,2");
+        assertEquals(3, result);
+    }
+
+    @Test
+    void splitMultipleValuesOnCommaAndSum() {
+        int result = sp.parseAndAdd("1,2,3");
+        assertEquals(6, result);
     }
 
 }

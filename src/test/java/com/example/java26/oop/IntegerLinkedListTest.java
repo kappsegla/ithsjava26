@@ -83,6 +83,14 @@ public class IntegerLinkedListTest {
     }
 
     @Test
+    void addingOneItemWhenRemovingAtIndex0ShouldBecomeEmptyList() {
+        newInstance.add(1);
+        newInstance.removeAtIndex(0);
+        assertEquals(0, newInstance.size());
+    }
+
+
+    @Test
     void removingOneValueWithCountTwoShouldDecreaseSize() {
         newInstance.add(1);
         newInstance.add(2);

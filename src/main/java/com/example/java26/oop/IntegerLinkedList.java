@@ -1,7 +1,5 @@
 package com.example.java26.oop;
 
-import org.w3c.dom.Node;
-
 public class IntegerLinkedList {
     private Node head;
     private int counter;
@@ -32,11 +30,9 @@ public class IntegerLinkedList {
         }
         if (counter == 1 && index == 0) {
             head = null;
-        }
-        else if(index == 0) {
+        } else if (index == 0) {
             head = head.next;
-        }
-        else {
+        } else {
             Node current = head;
             for (int i = 0; i < index - 1; i++) {
                 current = current.next;
@@ -44,7 +40,6 @@ public class IntegerLinkedList {
             current.next = current.next.next;
         }
         counter--;
-
     }
 
     public int size() {

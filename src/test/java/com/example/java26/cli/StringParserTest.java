@@ -32,4 +32,12 @@ public class StringParserTest {
         int result = sp.parseAndAdd("2");
         assertEquals(2, result);
     }
+
+    @Test
+    void nullShouldReturn0() {
+        StringParser sp = new StringParser();
+        int result = sp.parseAndAdd(null);
+        assertEquals(0, result);
+    }
+
 }

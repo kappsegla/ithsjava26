@@ -10,6 +10,7 @@ public class StringParserTest {
     //"3" -> 3
     //"1,2,3" -> 6
     //null -> 0
+    //"1;2;3" -> 6
     StringParser sp = new StringParser();
 
     @Test
@@ -47,5 +48,13 @@ public class StringParserTest {
         int result = sp.parseAndAdd("1,2,3");
         assertEquals(6, result);
     }
+    
+    @Test
+    void splittingUsingSemicolon() {
+        int result = sp.parseAndAdd("2;3;4");
+        assertEquals(9, result);
+    }
+    
+
 
 }

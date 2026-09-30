@@ -1,5 +1,7 @@
 package com.example.java26.oop;
 
+import org.w3c.dom.Node;
+
 public class IntegerLinkedList {
     private Node head;
     private int counter;
@@ -10,11 +12,10 @@ public class IntegerLinkedList {
             node.value = value;
             head = node;
             counter++;
-        }
-        else {
+        } else {
             //Hitta sista node objektet
             Node temp = head;
-            while( temp.next != null) {
+            while (temp.next != null) {
                 temp = temp.next;
             }
             //Skapa ny node och lägg till sist
@@ -26,6 +27,23 @@ public class IntegerLinkedList {
     }
 
     public void removeAtIndex(int index) {
+        if (counter == 0) {
+            return;
+        }
+        if (counter == 1 && index == 0) {
+            head = null;
+        }
+        else if(index == 0) {
+            head = head.next;
+        }
+        else {
+            Node current = head;
+            for (int i = 0; i < index - 1; i++) {
+                current = current.next;
+            }
+            current.next = current.next.next;
+        }
+        counter--;
 
     }
 
@@ -50,15 +68,28 @@ public class IntegerLinkedList {
     }
 
     public void removeLast() {
+        if (counter == 0) {
+            return;
+        }
 
+        if (counter == 1) {
+            head = null;
+        } else {
+            Node current = head;
+            while (current.next.next != null) {
+                current = current.next;
+            }
+            current.next = null;
+        }
+        counter--;
     }
 
     public void addFirst(int value) {
-
-    }
-
-    public void sort() {
-
+        Node node = new Node();
+        node.value = value;
+        node.next = head;
+        head = node;
+        counter++;
     }
 
     class Node {

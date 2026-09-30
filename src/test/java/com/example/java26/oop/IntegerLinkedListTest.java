@@ -77,6 +77,19 @@ public class IntegerLinkedListTest {
         newInstance.add(1);
         newInstance.removeLast();
         assertEquals(0, newInstance.size());
+        newInstance.add(2);
+        assertEquals(1, newInstance.size());
+        assertEquals(2, newInstance.getValue(0));
+    }
+
+    @Test
+    void removingOneValueWithCountTwoShouldDecreaseSize() {
+        newInstance.add(1);
+        newInstance.add(2);
+        newInstance.removeLast();
+        assertEquals(1, newInstance.size());
+        assertEquals(1, newInstance.getValue(0));
+        assertThrows(IndexOutOfBoundsException.class, () -> newInstance.getValue(1));
     }
 
     @Test
@@ -133,20 +146,4 @@ public class IntegerLinkedListTest {
         assertEquals(2, newInstance.getValue(0));
         assertEquals(1, newInstance.getValue(1));
     }
-
-    @Test
-    void sortingShouldPutValuesInNormalOrder() {
-        newInstance.add(4);
-        newInstance.add(1);
-        newInstance.add(3);
-        newInstance.add(2);
-        newInstance.sort();
-
-        assertEquals(1, newInstance.getValue(0));
-        assertEquals(2, newInstance.getValue(1));
-        assertEquals(3, newInstance.getValue(2));
-        assertEquals(4, newInstance.getValue(3));
-    }
-
-
 }

@@ -45,7 +45,8 @@ public class MultipleIntegers {
     }
 
     public void removeLast() {
-        counter--;
+        if (counter > 0)
+            counter--;
     }
 
     public void removeAtIndex(int index) {
@@ -61,14 +62,14 @@ public class MultipleIntegers {
         return counter;
     }
 
-    public void sort(){
+    public void sort() {
         var copy = Arrays.copyOfRange(values, 0, counter);
         bogoSort(copy);
         values = copy;
     }
 
     private void bogoSort(int[] values) {
-        while( notSorted(values) )
+        while (notSorted(values))
             shuffle(values);
     }
 

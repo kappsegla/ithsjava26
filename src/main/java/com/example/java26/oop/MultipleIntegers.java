@@ -1,7 +1,6 @@
 package com.example.java26.oop;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Random;
 
 public class MultipleIntegers {

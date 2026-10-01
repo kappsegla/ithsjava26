@@ -1,12 +1,37 @@
 package com.example.java26.exercises.week6;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class BrainfuckTest {
 
     Brainfuck brainfuck = new Brainfuck();
+    private final InputStream originalIn = System.in;
+    private final PrintStream originalOut = System.out;
+    private ByteArrayOutputStream capturedOut;
+
+    @BeforeEach
+    void setUp() {
+        // Intercept System.out to capture console output printed by the application
+        capturedOut = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(capturedOut, true, StandardCharsets.UTF_8));
+    }
+
+    @AfterEach
+    void tearDown() {
+        // ALWAYS restore original system streams to avoid polluting other tests
+        System.setIn(originalIn);
+        System.setOut(originalOut);
+    }
+
 
     @Test
     void incrementAtPointer() {
@@ -54,6 +79,26 @@ class BrainfuckTest {
         assertEquals(0, brainfuck.memory[0], "Cell 0 ska vara tillbaka på 0");
         assertEquals(1, brainfuck.pointer, "Pekaren ska ha flyttats till cell 1");
     }
+
+    @Test
+    void outputASCIICharacterAtPointer() {
+        brainfuck.memory[0] = 65;
+        brainfuck.execute(".");
+        String consoleOutput = capturedOut.toString(StandardCharsets.UTF_8);
+        assertEquals("A", consoleOutput);
+    }
+
+    @Test
+    void loopSkipsWhenZero() {
+        brainfuck.memory[brainfuck.pointer] = 0;
+
+        brainfuck.execute("[+]");
+
+        assertEquals(0, brainfuck.memory[0],
+                "Loopen ska hoppas över när cellen är 0");
+    }
+
+
 
 
 

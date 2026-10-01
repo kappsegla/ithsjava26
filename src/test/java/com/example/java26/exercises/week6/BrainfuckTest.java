@@ -2,6 +2,7 @@ package com.example.java26.exercises.week6;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -98,8 +99,49 @@ class BrainfuckTest {
                 "Loopen ska hoppas över när cellen är 0");
     }
 
+    @Test
+    void loopExecutesWhenNonZero() {
+        brainfuck.memory[0] = 1;
 
+        brainfuck.execute("[->+<]");
 
+        assertEquals(0, brainfuck.memory[0],
+                "Loopen ska köras tills cellen blir 0");
+    }
 
+    @Test
+    void loopBackwardsJumpWhenNonZero() {
+        brainfuck.execute("+[-]");
 
+        assertEquals(0, brainfuck.memory[0],
+                "] ska hoppa bakåt när cellen är ≠ 0, men inte när den är 0");
+    }
+
+    @Test
+    void loopRepeatsUntilZero() {
+        brainfuck.execute("+++[-]");
+
+        assertEquals(0, brainfuck.memory[0],
+                "Loopen ska repetera tills cellen blir 0");
+    }
+
+    @Test
+    void nestedLoopsExecuteCorrectly() {
+        // Program:
+        // ++         cell0 = 2
+        // [          outer loop (runs twice)
+        //   >+       cell1 += 1
+        //   [        inner loop (runs until cell1 == 0)
+        //     >++    cell2 += 2
+        //     <-     cell1 -= 1
+        //   ]        end inner loop
+        //   <-       cell0 -= 1
+        // ]          end outer loop
+
+        brainfuck.execute("++[>+[>++<-]<-]");
+
+        assertEquals(0, brainfuck.memory[0], "Cell 0 ska vara 0 efter yttre loop");
+        assertEquals(0, brainfuck.memory[1], "Cell 1 ska vara 0 efter inre loop");
+        assertEquals(4, brainfuck.memory[2], "Cell 2 ska ha ackumulerat värdet 4");
+    }
 }

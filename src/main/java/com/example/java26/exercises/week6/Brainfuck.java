@@ -36,6 +36,7 @@ public class Brainfuck {
                 }
                 case ',' -> {
                     try {
+                        //Needs enter press after entering character(s). Java doesn't have raw mode for console
                         int input = System.in.read();
                         memory[pointer] = (input == -1) ? 0 : (input & 0xFF);
                     } catch (IOException e) {

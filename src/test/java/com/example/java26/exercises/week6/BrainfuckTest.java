@@ -2,15 +2,15 @@ package com.example.java26.exercises.week6;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class BrainfuckTest {
 
@@ -144,4 +144,20 @@ class BrainfuckTest {
         assertEquals(0, brainfuck.memory[1], "Cell 1 ska vara 0 efter inre loop");
         assertEquals(4, brainfuck.memory[2], "Cell 2 ska ha ackumulerat värdet 4");
     }
+
+    @Test
+    void readingFromKeyBoard() {
+        String userScript = String.join(System.lineSeparator(),
+                "AB",
+                ""
+        ) + System.lineSeparator();
+
+        System.setIn(new ByteArrayInputStream(userScript.getBytes(StandardCharsets.UTF_8)));
+
+        brainfuck.execute(",>,.<.");
+        String consoleOutput = capturedOut.toString(StandardCharsets.UTF_8);
+        assertEquals("BA", consoleOutput);
+    }
+
+
 }

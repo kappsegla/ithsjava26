@@ -1,11 +1,13 @@
 package com.example.java26.exercises.week6;
 
+import java.io.IOException;
+
 public class Brainfuck {
     public static int MEMORY_SIZE = 30000;
     int[] memory = new int[MEMORY_SIZE];
     int pointer = 0;
 
-    static void main() {
+    static void main() throws IOException {
         Brainfuck brainfuck = new Brainfuck();
         //Hello World
         brainfuck.execute(">++++++++[<+++++++++>-]<.>++++[<+++++++>-]<+.+++++++..+++.>>++++++[<+++++++>-]<++.------------.>++++++[<+++++++++>-]<+.<.+++.------.--------.>>>++++[<++++++++>-]<+.");
@@ -30,6 +32,14 @@ public class Brainfuck {
                 case ']' -> {
                     if (memory[pointer] != 0) {
                         pc = jumpBackward(pc, code);
+                    }
+                }
+                case ',' -> {
+                    try {
+                        int input = System.in.read();
+                        memory[pointer] = (input == -1) ? 0 : (input & 0xFF);
+                    } catch (IOException e) {
+                        memory[pointer] = 0;
                     }
                 }
             }

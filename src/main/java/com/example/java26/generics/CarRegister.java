@@ -2,11 +2,14 @@ package com.example.java26.generics;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CarRegister {
 
     private final List<Car> cars = new ArrayList<>();
+    private final Map<String, Car> carMap = new HashMap<>();
 
     static void main() {
         var register = new CarRegister();
@@ -22,7 +25,11 @@ public class CarRegister {
         register.cars.add(new Car("WCP667", new Color(255, 140, 0)));        // orange
         register.cars.add(new Car("BRF128", new Color(128, 0, 128)));        // purple
         register.cars.add(new Car("WXM552", Color.GRAY));
-        register.cars.add(null);
+
+        //Build carMap for fast lookup of cars by license plate number
+        for (Car car : register.cars) {
+            register.carMap.put(car.licensePlate(), car);
+        }
 
         IO.println("Does car ABC123 exist? " + register.cars.contains(new Car("ABC123", Color.RED)));
 
@@ -35,8 +42,17 @@ public class CarRegister {
             IO.println("Found " + car.licensePlate() + " with " + car.color() + " color.");
         else
             IO.println("No car found.");
+
+        //Search for car in carMap using licensePlate as key. Time complexity O(1)
+        IO.println("This is what I found: " + register.carMap.get(licensePlate));
+
     }
 
+    /**
+     * This method has a worst case execution time of O(n)
+     * @param licensePlate
+     * @return
+     */
     private Car findCar(String licensePlate) {
         for (Car car : cars) {
             if (car != null && car.licensePlate().equalsIgnoreCase(licensePlate)) {
@@ -49,7 +65,7 @@ public class CarRegister {
 
     private boolean contains(Car toSearchFor) {
         for (int i = 0; i < cars.size(); i++) {
-            Car car = cars.get(i);
+            Car car = cars.get(i);  //get method on arraylist has time complexity O(1)
             if (toSearchFor.equals(car)) {
                 return true;
             }

@@ -29,8 +29,23 @@ public class CarRegister {
         Car toSearchFor = new Car("ABC123", Color.RED);
         IO.println(register.contains(toSearchFor));
 
-
+        String licensePlate = IO.readln("Enter license plate to search for: ");
+        var car = register.findCar(licensePlate);
+        if( car != null)
+            IO.println("Found " + car.licensePlate() + " with " + car.color() + " color.");
+        else
+            IO.println("No car found.");
     }
+
+    private Car findCar(String licensePlate) {
+        for (Car car : cars) {
+            if (car != null && car.licensePlate().equalsIgnoreCase(licensePlate)) {
+                return car;
+            }
+        }
+        return null;
+    }
+
 
     private boolean contains(Car toSearchFor) {
         for (int i = 0; i < cars.size(); i++) {

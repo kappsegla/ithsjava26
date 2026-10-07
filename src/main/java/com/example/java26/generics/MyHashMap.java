@@ -1,5 +1,7 @@
 package com.example.java26.generics;
 
+import java.util.Objects;
+
 public class MyHashMap<K,V> {
     private final int DEFAULT_CAPACITY = 16;
     private final float LOAD_FACTOR = 0.75f;
@@ -12,7 +14,7 @@ public class MyHashMap<K,V> {
 
         var currentNode = head;
         while (currentNode != null) {
-            if (currentNode.key.equals(key)) {
+            if (Objects.equals(currentNode.key, key)) {
                 //Same key
                 currentNode.value = value;
                 return;
@@ -30,12 +32,16 @@ public class MyHashMap<K,V> {
         int index = getIndex(key);
         Node<K,V> current = buckets[index];
         while (current != null) {
-            if (current.key.equals(key)) {
+            if (Objects.equals(current.key, key)) {
                 return current.value;
             }
             current = current.next;
         }
         return null;
+    }
+
+    public int size() {
+        return size;
     }
 
     private int getIndex(K key) {
@@ -62,7 +68,7 @@ public class MyHashMap<K,V> {
 
         String s1 = "Aa";
         String s2 = "BB";
-        String s3 = "CCx";
+        String s3 = "Cc";
 
         MyHashMap<String, String> mh = new MyHashMap<>();
         mh.put(s1, "Value1");

@@ -2,10 +2,10 @@ package com.example.java26.generics;
 
 import java.util.Objects;
 
-public class MyHashMap<K,V> {
+public class MyHashMap<K, V> {
     private final int DEFAULT_CAPACITY = 16;
     private final float LOAD_FACTOR = 0.75f;
-    Node[] buckets = new Node[DEFAULT_CAPACITY];
+    private Node[] buckets = new Node[DEFAULT_CAPACITY];
     private int size = 0;
 
     public void put(K key, V value) {
@@ -25,12 +25,13 @@ public class MyHashMap<K,V> {
         buckets[index] = new Node(key, value, head);
         size++;
 
-        //Todo: Kolla loadfactor, (size * 1.0 / buckets.length ) > LOAD_FACTOR increase array size
+        if (size > buckets.length * LOAD_FACTOR)
+            resize();
     }
 
     public V get(K key) {
         int index = getIndex(key);
-        Node<K,V> current = buckets[index];
+        Node<K, V> current = buckets[index];
         while (current != null) {
             if (Objects.equals(current.key, key)) {
                 return current.value;
@@ -50,8 +51,26 @@ public class MyHashMap<K,V> {
         return Math.abs(key.hashCode()) % buckets.length;
     }
 
+    private void resize() {
+        //Save ref to old buckets
+        Node<K, V>[] oldBuckets = buckets;
+        //Create new bucket with double size
+        buckets = new Node[buckets.length * 2];
+        size = 0;
 
-    static class Node<K,V> {
+        //Loop through oldBuckets and add with put(key, value)
+        //Remember to check for next links
+        for (Node<K, V> headNode : oldBuckets) {
+            var current = headNode;
+            while (current != null) {
+                //Rehashing when adding to the new larger bucket array
+                put(current.key, current.value);
+                current = current.next;
+            }
+        }
+    }
+
+    static class Node<K, V> {
         K key;
         V value;
         Node next;

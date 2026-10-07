@@ -71,4 +71,30 @@ class MyHashMapTest {
         map.put("Cc", "3");
         assertEquals(null, map.get("Kk"));
     }
+
+    @Test
+    void triggerResize() {
+        map.put("1", "1");
+        map.put("2", "2");
+        map.put("3", "3");
+        map.put("4", "4");
+        map.put("5", "5");
+        map.put("6", "6");
+        map.put("7", "7");
+        map.put("8", "8");
+        map.put("9", "9");
+        map.put("10", "10");
+        map.put("11", "11");
+        map.put("21", "12");
+        map.put("22", "13");
+        map.put("23", "14");
+        map.put("24", "15");
+        map.put("26", "16");
+        map.put("27", "17");
+        map.put("28", "18");
+        map.put("29", "19");
+        map.put("30", "20");
+        assertEquals(20, map.size());
+    }
+
 }

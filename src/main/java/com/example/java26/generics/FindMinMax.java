@@ -19,11 +19,41 @@ public class FindMinMax {
 //        return "{\"min\": "+min+",\"max\": "+max+"}";
 //    }
 
-    public static MinMax findMinMax(List<Integer> list) {
+//    public static Map<String, Integer> findMinMax(List<Integer> list) {
+//        var min = Collections.min(list);
+//        var max = Collections.max(list);
+//        return Map.of("min", min, "max", max);
+//    }
+
+    //    public static MinMax findMinMax(List<Integer> list) {
+//        var min = Collections.min(list);
+//        var max = Collections.max(list);
+//        return new MinMax(min, max);
+//    }
+    public static Pair<Integer, Integer> findMinMax(List<Integer> list) {
         var min = Collections.min(list);
         var max = Collections.max(list);
-        return new MinMax(min, max);
+        return new Pair<>(min, max);
     }
+
+//    public static class Pair<T1, T2> {
+//        T1 value1;
+//        T2 value2;
+//
+//        public Pair(T1 value1, T2 value2) {
+//            this.value1 = value1;
+//            this.value2 = value2;
+//        }
+//
+//        @Override
+//        public String toString() {
+//            return "Pair{" +
+//                    "value1=" + value1 +
+//                    ", value2=" + value2 +
+//                    '}';
+//        }
+//    }
+    public static record Pair<T1,T2>(T1 first, T2 second) {}
 
     record MinMax(int min, int max) {
     }

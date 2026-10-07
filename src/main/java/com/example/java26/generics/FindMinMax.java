@@ -33,10 +33,19 @@ public class FindMinMax {
     public static Pair<Integer, Integer> findMinMax(List<Integer> list) {
         var min = Collections.min(list);
         var max = Collections.max(list);
-        return new Pair<>(min, max);
+        return Pair.of(min, max);
+        // return new Pair<>(min, max);
     }
 
-//    public static class Pair<T1, T2> {
+    public static Triplet<Integer,Integer,Double> findMinMaxMean(List<Integer> list){
+        var sum = 0;
+        for(Integer i : list){
+            sum += i;
+        }
+        return Triplet.of(Collections.min(list),Collections.max(list),sum * 1.0 / list.size());
+    }
+
+    //    public static class Pair<T1, T2> {
 //        T1 value1;
 //        T2 value2;
 //
@@ -53,7 +62,17 @@ public class FindMinMax {
 //                    '}';
 //        }
 //    }
-    public static record Pair<T1,T2>(T1 first, T2 second) {}
+    public static record Pair<T1, T2>(T1 first, T2 second) {
+        public static <T1,T2> Pair<T1,T2> of(T1 first, T2 second){
+            return new Pair<>(first,second);
+        }
+    }
+
+    public static record Triplet<T1,T2,T3>(T1 first, T2 second, T3 third) {
+        public static <T1,T2,T3> Triplet<T1,T2,T3> of(T1 first, T2 second, T3 third) {
+            return new Triplet<>(first,second,third);
+        }
+    }
 
     record MinMax(int min, int max) {
     }
@@ -66,7 +85,7 @@ public class FindMinMax {
         list.add(4);
         list.add(5);
 
-        var result = findMinMax(list);
+        var result = findMinMaxMean(list);
 
         IO.println(result);
     }

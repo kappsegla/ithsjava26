@@ -1,5 +1,6 @@
 package com.example.java26.generics;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 public class MyHashMap<K, V> {
@@ -8,16 +9,17 @@ public class MyHashMap<K, V> {
     private Node[] buckets = new Node[DEFAULT_CAPACITY];
     private int size = 0;
 
-    public void put(K key, V value) {
+    public V put(K key, V value) {
         int index = getIndex(key);
         var head = buckets[index];
 
-        var currentNode = head;
+        Node<K, V> currentNode = head;
         while (currentNode != null) {
             if (Objects.equals(currentNode.key, key)) {
                 //Same key
+                var oldValue = currentNode.value;
                 currentNode.value = value;
-                return;
+                return oldValue;
             }
             currentNode = currentNode.next;
         }
@@ -27,6 +29,7 @@ public class MyHashMap<K, V> {
 
         if (size > buckets.length * LOAD_FACTOR)
             resize();
+        return null;
     }
 
     public V get(K key) {
@@ -43,6 +46,12 @@ public class MyHashMap<K, V> {
 
     public int size() {
         return size;
+    }
+
+    public void clear() {
+        size = 0;
+        //buckets = new Node[DEFAULT_CAPACITY];
+        Arrays.fill(buckets, null);
     }
 
     private int getIndex(K key) {
@@ -84,7 +93,6 @@ public class MyHashMap<K, V> {
 
 
     static void main() {
-
         String s1 = "Aa";
         String s2 = "BB";
         String s3 = "Cc";

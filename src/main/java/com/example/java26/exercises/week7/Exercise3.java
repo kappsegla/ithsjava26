@@ -1,6 +1,7 @@
 package com.example.java26.exercises.week7;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,10 +15,20 @@ public class Exercise3 {
         return reversed;
     }
 
+    public static <T> List<T> reversedList2(List<T> original) {
+        return new ArrayList<>(original.reversed());
+    }
+
     public static <T> List<T> reverse(List<T> original) {
         List<T> reversed = new ArrayList<>(original);
         Collections.reverse(reversed);
         return reversed;
+    }
+
+    static void main() {
+        List<Integer> integers = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        integers.reversed().forEach(System.out::println);
+
     }
 
 

@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -20,25 +21,39 @@ public class AIAgent {
 
         HttpClient client = HttpClient.newHttpClient();
         ObjectMapper mapper = new ObjectMapper();
-        // Skapa en meddelandelista med en fråga.
-        var messages = List.of(new Message("user", "Svara kort: Vad är Java?"));
-        var requestBody = mapper.writeValueAsString( new Request(MODEL, messages, null));
 
-        // Skapa HTTP-förfrågan
-        HttpRequest request = HttpRequest.newBuilder()
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + API_KEY)
-                .uri(URI.create(HOST + "/api/v1/chat/completions"))
-                .build();
+        List<Message> history = new ArrayList<>();
 
-        // Skicka och läs svar
-        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        OpenRouterResponse or = mapper.readValue(response.body(), OpenRouterResponse.class);
+        history.add(new Message("system","Svara kort. Max 2 meningar."));
 
-        //Skriv ut svaret från modellen
-        String reply = or.choices().getFirst().message().content();
-        IO.println("Assistant: " + reply);
+        System.out.println("Chatten är igång! Skriv 'quit' för att avsluta.\n");
+        while(true) {
+            String input = IO.readln("You: ");
+            if( "quit".equals(input) )
+                break;
+
+            history.add(new Message("user",input));
+
+            var requestBody = mapper.writeValueAsString(new Request(MODEL, history, null));
+
+            // Skapa HTTP-förfrågan
+            HttpRequest request = HttpRequest.newBuilder()
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + API_KEY)
+                    .uri(URI.create(HOST + "/api/v1/chat/completions"))
+                    .build();
+
+            // Skicka och läs svar
+            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            OpenRouterResponse or = mapper.readValue(response.body(), OpenRouterResponse.class);
+
+            //Skriv ut svaret från modellen
+            String reply = or.choices().getFirst().message().content();
+            IO.println("Assistant: " + reply);
+
+            history.add(new Message("assistant",reply));
+        }
     }
 }
 

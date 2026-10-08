@@ -1,6 +1,8 @@
 package com.example.java26.generics;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class MyHashMap<K, V> {
@@ -79,7 +81,7 @@ public class MyHashMap<K, V> {
         }
     }
 
-    static class Node<K, V> {
+     static class Node<K, V> {
         K key;
         V value;
         Node next;

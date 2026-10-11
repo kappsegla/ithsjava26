@@ -1,5 +1,7 @@
 package com.example.java26.agent;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -57,7 +59,7 @@ public class AIAgent {
     }
 }
 
-record Request(String model, List<Message> messages, Object tools) {}
+record Request(String model, List<Message> messages, @Nullable Object tools) {}
 record Message(String role, String content) {}
 record OpenRouterResponse(List<Choice> choices) {}
 record Choice(int index, MessageResponse message) {}

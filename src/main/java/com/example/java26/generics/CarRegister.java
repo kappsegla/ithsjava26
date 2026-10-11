@@ -1,5 +1,7 @@
 package com.example.java26.generics;
 
+import org.jspecify.annotations.Nullable;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,7 +55,7 @@ public class CarRegister {
      * @param licensePlate
      * @return
      */
-    private Car findCar(String licensePlate) {
+    private @Nullable Car findCar(String licensePlate) {
         for (Car car : cars) {
             if (car != null && car.licensePlate().equalsIgnoreCase(licensePlate)) {
                 return car;

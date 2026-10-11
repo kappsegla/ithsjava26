@@ -15,6 +15,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
             <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>3.2.3</version>
@@ -35,6 +40,25 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.16.0</version>
+            </plugin>
+            <plugin>
+                <groupId>am.ik.maven</groupId>
+                <artifactId>nullability-maven-plugin</artifactId>
+                <version>0.5.2</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>configure</goal>
+                            <goal>generate-package-info</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>

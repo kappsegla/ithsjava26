@@ -1,5 +1,7 @@
 package com.example.java26.exercises.system;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.ArrayList;
 
 public class Office {
@@ -36,7 +38,7 @@ public class Office {
         return availableRooms;
     }
 
-    public Room findAvailableRoom(int minCapacity) {
+    public @Nullable Room findAvailableRoom(int minCapacity) {
         for (Room room : rooms) {
             if (room.getCapacity() >= minCapacity && !room.isBooked()) {
                 return room;

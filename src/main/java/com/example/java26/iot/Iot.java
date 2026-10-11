@@ -1,7 +1,6 @@
 package com.example.java26.iot;
 
 public class Iot {
-    private Device device;
 
     static void main() {
         Device device1 = new Thermometer();

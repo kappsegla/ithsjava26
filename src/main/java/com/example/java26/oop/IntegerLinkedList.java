@@ -1,5 +1,8 @@
 package com.example.java26.oop;
 
+import org.jspecify.annotations.NullUnmarked;
+
+@NullUnmarked
 public class IntegerLinkedList {
     private Node head;
     private int counter;

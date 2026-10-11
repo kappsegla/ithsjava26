@@ -1,11 +1,13 @@
 package com.example.java26.exercises.booking;
 
+import org.jspecify.annotations.Nullable;
+
 public class Office {
     public void addRoom(Room room) {
 
     }
 
-    public Room findAvailableRoom(int minCapacity) {
+    public @Nullable Room findAvailableRoom(int minCapacity) {
         return null;
     }
 

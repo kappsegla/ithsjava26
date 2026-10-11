@@ -1,5 +1,7 @@
 package com.example.java26.generics;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +13,7 @@ public class MyHashMap<K, V> {
     private Node[] buckets = new Node[DEFAULT_CAPACITY];
     private int size = 0;
 
-    public V put(K key, V value) {
+    public @Nullable V put(K key, V value) {
         int index = getIndex(key);
         var head = buckets[index];
 
@@ -34,7 +36,7 @@ public class MyHashMap<K, V> {
         return null;
     }
 
-    public V get(K key) {
+    public @Nullable V get(K key) {
         int index = getIndex(key);
         Node<K, V> current = buckets[index];
         while (current != null) {

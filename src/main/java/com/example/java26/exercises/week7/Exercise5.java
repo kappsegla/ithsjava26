@@ -1,5 +1,7 @@
 package com.example.java26.exercises.week7;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,7 +25,7 @@ public class Exercise5 {
         System.exit(0);
     }
 
-    public static String getCapital(String land) {
+    public static @Nullable String getCapital(String land) {
         return huvudstad.get(land);
     }
 

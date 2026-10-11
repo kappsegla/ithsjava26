@@ -1,12 +1,13 @@
 package com.example.java26.exercises.week4;
 
-import java.util.Arrays;
+import org.jspecify.annotations.Nullable;
 
 public class Team {
     private String teamName;
-    private Employee teamLeader;
+    @Nullable
+    private Employee teamLeader = null;
 
-    public Team(String teamName, Employee teamLeader) {
+    public Team(String teamName, @Nullable Employee teamLeader) {
         this.teamName = teamName;
         this.teamLeader = teamLeader;
     }
@@ -19,14 +20,15 @@ public class Team {
         this.teamName = teamName;
     }
 
-    public Employee getTeamLeader() {
+    public @Nullable Employee getTeamLeader() {
         return teamLeader;
     }
 
     public void copyTo(Team clone) {
         clone.teamName = teamName;
         //clone.teamLeader = teamLeader;
-        clone.teamLeader = new Employee(teamLeader);
+        if (teamLeader != null)
+            clone.teamLeader = new Employee(teamLeader);
     }
 
     static void main() {
@@ -36,11 +38,12 @@ public class Team {
         team1.copyTo(team2);
         //Alt1 using temporary variable
         var teamLeader = team2.getTeamLeader();
-        teamLeader.setSalary(50000);
+        if (teamLeader != null)
+            teamLeader.setSalary(50000);
         //Alt2 chaining method calls
-        team2.getTeamLeader().setSalary(50000);
+        //team2.getTeamLeader().setSalary(50000);
 
-        IO.println(team1.teamName + " " + team1.teamLeader.getSalary());
-        IO.println(team2.teamName + " " + team2.teamLeader.getSalary());
+//        IO.println(team1.teamName + " " + team1.teamLeader.getSalary());
+//        IO.println(team2.teamName + " " + team2.teamLeader.getSalary());
     }
 }

@@ -2,6 +2,7 @@ package com.example.java26.functional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Java8Streams {
 
@@ -14,10 +15,12 @@ public class Java8Streams {
         books.add(new Book("Dune", "Frank Herbert", 604));
         books.add(new Book("The Hobbit", "J.R.R. Tolkien", 310));
 
-        books.stream()
-                .filter(book-> book.pages() > 400)
-                .map(book-> book.title())
-                .forEach(IO::println);
+        var result = books.stream()
+                .filter(book -> book.pages() > 400)
+                .map(book -> book.title())
+                .collect(Collectors.toSet());
+
+        result.forEach(System.out::println);
     }
 }
 

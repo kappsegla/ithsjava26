@@ -51,7 +51,6 @@ public class ExceptionsInStream2 {
         return "Hello " + name.toUpperCase() + "!";
     }
 
-
     static Either<String, Integer> parseToInt(String s) {
         try {
             return new Either.Right<>(Integer.parseInt(s));

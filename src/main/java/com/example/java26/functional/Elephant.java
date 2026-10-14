@@ -3,6 +3,7 @@ package com.example.java26.functional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 public class Elephant {
@@ -34,6 +35,14 @@ public class Elephant {
                 .flatMap(Optional::stream)
                 .map(User::name)
                 .forEach(IO::println);
+
+        IO.println();
+        Random random = new Random();
+
+        User user = new User("Martin", true);
+        String displayName = Optional.ofNullable(user.name())
+                .orElseGet(()->"Guest" + random.nextInt(0,100));
+        IO.println(displayName);
     }
 
     record User(String name, boolean enabled) {

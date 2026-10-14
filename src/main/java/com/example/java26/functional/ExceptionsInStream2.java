@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ExceptionsInStream2 {
     static void main() {
@@ -21,8 +22,10 @@ public class ExceptionsInStream2 {
 
         //Left values
         result.get(false).stream()
-                .map(Either::getLeft)
-                .flatMap(Optional::stream)
+                .flatMap(e -> switch (e) {
+                    case Either.Right(_) -> Stream.empty();
+                    case Either.Left(var value) -> Stream.of(value);
+                })
                 .forEach(IO::println);
     }
 
@@ -45,9 +48,9 @@ public class ExceptionsInStream2 {
             return this instanceof Right<L, R>(R value) ? Optional.of(value) : Optional.empty();
         }
 
-        default Optional<L> getLeft() {
-            return this instanceof Left<L, R>(L value) ? Optional.of(value) : Optional.empty();
-        }
+//        default Optional<L> getLeft() {
+//            return this instanceof Left<L, R>(L value) ? Optional.of(value) : Optional.empty();
+//        }
 
         default boolean isRight() {
             return this instanceof Right;

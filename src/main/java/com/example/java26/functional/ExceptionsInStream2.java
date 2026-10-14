@@ -2,6 +2,7 @@ package com.example.java26.functional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ExceptionsInStream2 {
@@ -14,12 +15,14 @@ public class ExceptionsInStream2 {
 
         //Right values
         result.get(true).stream()
-                .map(e -> ((Either.Right<String, Integer>) e).value())
+                .map(Either::getRight)
+                .flatMap(Optional::stream)
                 .forEach(IO::println);
 
         //Left values
         result.get(false).stream()
-                .map(e -> ((Either.Left<String, Integer>) e).value())
+                .map(Either::getLeft)
+                .flatMap(Optional::stream)
                 .forEach(IO::println);
     }
 
@@ -36,6 +39,14 @@ public class ExceptionsInStream2 {
         }
 
         record Right<L, R>(R value) implements Either<L, R> {
+        }
+
+        default Optional<R> getRight() {
+            return this instanceof Right<L, R>(R value) ? Optional.of(value) : Optional.empty();
+        }
+
+        default Optional<L> getLeft() {
+            return this instanceof Left<L, R>(L value) ? Optional.of(value) : Optional.empty();
         }
 
         default boolean isRight() {

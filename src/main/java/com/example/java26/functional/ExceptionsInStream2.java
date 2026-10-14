@@ -1,10 +1,14 @@
 package com.example.java26.functional;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 
 public class ExceptionsInStream2 {
     static void main() {
@@ -15,19 +19,38 @@ public class ExceptionsInStream2 {
                 .collect(Collectors.partitioningBy(Either::isRight));
 
         //Right values
-        result.get(true).stream()
-                .map(Either::getRight)
-                .flatMap(Optional::stream)
-                .forEach(IO::println);
+        var rights = result.get(true);
+        if (rights != null)
+            rights.stream()
+                    .map(Either::getRight)
+                    .flatMap(Optional::stream)
+                    .forEach(IO::println);
 
         //Left values
-        result.get(false).stream()
-                .flatMap(e -> switch (e) {
-                    case Either.Right(_) -> Stream.empty();
-                    case Either.Left(var value) -> Stream.of(value);
-                })
-                .forEach(IO::println);
+        var lefts = result.get(false);
+        if (lefts != null)
+            lefts.stream()
+                    .flatMap(e -> switch (e) {
+                        case Either.Right(_) -> Stream.empty();
+                        case Either.Left(var value) -> Stream.of(value);
+                    })
+                    .forEach(IO::println);
+
+        String input = readValue();
+        if (input != null) {
+            var hello = sayHello(input);
+            IO.println(hello);
+        }
     }
+
+    static @Nullable String readValue() {
+        return IO.readln("Enter something: ");
+    }
+
+    static String sayHello(String name) {
+        return "Hello " + name.toUpperCase() + "!";
+    }
+
 
     static Either<String, Integer> parseToInt(String s) {
         try {

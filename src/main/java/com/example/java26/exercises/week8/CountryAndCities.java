@@ -2,7 +2,7 @@ package com.example.java26.exercises.week8;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class CountryAndCities {
 
@@ -41,6 +41,75 @@ public class CountryAndCities {
                 .average().orElse(0.0);
         IO.println(String.format("Average area: %,.2f", average));
         IO.println(getCountries().stream().filter(c -> c.area() < average).count());
+
+        //Filter and joining
+        IO.println(getCountries().stream()
+                .filter(c -> c.population() < 5.0)
+                .map(Country::countryName)
+                .collect(Collectors.joining(" ")));
+        //
+        var greaterThan10000 = getCountries().stream()
+                .filter(c -> c.area > 10000)
+                .count();
+        var greaterThan100000 = getCountries().stream()
+                .filter(c -> c.area > 100_000)
+                .count();
+        var greaterThan1000000 = getCountries().stream()
+                .filter(c -> c.area > 1_000_000)
+                .count();
+        IO.println(greaterThan10000 + " " + greaterThan100000 + " " + greaterThan1000000);
+        {
+            int a = 0;
+            int b = 0;
+            int c = 0;
+            for (var ctry : getCountries()) {
+                if (ctry.area > 1_000_000) {
+                    a++;
+                    b++;
+                    c++;
+                } else if (ctry.area > 100_000) {
+                    a++;
+                    b++;
+                } else if (ctry.area > 10_000)
+                    a++;
+            }
+            IO.println(a + " " + b + " " + c);
+        }
+        //Countries and capital starts with same letter
+        getCountries().stream()
+                .filter(c-> c.countryName().charAt(0) == c.capital().charAt(0))
+                .map(c-> c.countryName() + " " + c.capital())
+                .forEach(IO::println);
+        //Countries with more letters in the name than in the capital
+        getCountries().stream()
+                .filter(c-> c.countryName().length() > c.capital().length())
+                .map(Country::countryName)
+                .forEach(IO::println);
+        IO.println("=====");
+        //5 smallest populations
+        getCountries().stream()
+                .sorted(Comparator.comparing(Country::population))
+                .limit(5)
+                .map(Country::countryName)
+                .forEach(IO::println);
+        IO.println("=====");
+        //3 first countries with > 7 mil
+        getCountries().stream()
+                .filter(c -> c.population() > 7.0)
+                .sorted(Comparator.comparing(Country::population))
+                .limit(3)
+                .map(Country::countryName)
+                .forEach(IO::println);
+        //Exercise 13
+        getCountries().stream()
+                .filter(c -> c.area() >= 500000)
+                .sorted(Comparator.comparing(Country::area).reversed())
+                .limit(3)
+                .map(c-> c.countryName + "," + c.area())
+                .forEach(IO::println);
+
+
+
     }
 
 

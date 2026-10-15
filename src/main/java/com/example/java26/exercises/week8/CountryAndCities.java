@@ -2,6 +2,7 @@ package com.example.java26.exercises.week8;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CountryAndCities {
@@ -77,12 +78,12 @@ public class CountryAndCities {
         }
         //Countries and capital starts with same letter
         getCountries().stream()
-                .filter(c-> c.countryName().charAt(0) == c.capital().charAt(0))
-                .map(c-> c.countryName() + " " + c.capital())
+                .filter(c -> c.countryName().charAt(0) == c.capital().charAt(0))
+                .map(c -> c.countryName() + " " + c.capital())
                 .forEach(IO::println);
         //Countries with more letters in the name than in the capital
         getCountries().stream()
-                .filter(c-> c.countryName().length() > c.capital().length())
+                .filter(c -> c.countryName().length() > c.capital().length())
                 .map(Country::countryName)
                 .forEach(IO::println);
         IO.println("=====");
@@ -105,9 +106,17 @@ public class CountryAndCities {
                 .filter(c -> c.area() >= 500000)
                 .sorted(Comparator.comparing(Country::area).reversed())
                 .limit(3)
-                .map(c-> c.countryName + "," + c.area())
+                .map(c -> c.countryName + "," + c.area())
+                .forEach(IO::println);
+        IO.println("=====");
+        //Grouping by and counting
+        var result = getCountries().stream()
+                .collect(Collectors.groupingBy(c -> c.countryName().charAt(0), Collectors.counting()));
+        result.entrySet().stream()
+                .sorted(Comparator.comparing(Map.Entry::getKey))  //Just to print everything in order
                 .forEach(IO::println);
 
+        IO.println("=====");
 
 
     }

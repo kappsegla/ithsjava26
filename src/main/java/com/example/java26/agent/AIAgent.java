@@ -1,7 +1,5 @@
 package com.example.java26.agent;
 
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -11,6 +9,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 public class AIAgent {
@@ -26,17 +25,28 @@ public class AIAgent {
 
         List<Message> history = new ArrayList<>();
 
-        history.add(new Message("system","Svara kort. Max 2 meningar."));
+        history.add(new Message("system", "Svara kort. Max 2 meningar."));
+        //Create tool list
+        List<Tool> tools = List.of(
+                new Tool("function",
+                        new ToolFunctionSpec("get_current_datetime",
+                                "Returns the current date and time in UTC",
+                                Map.of("type", "object",
+                                        "properties", Map.of(),
+                                        "required", List.of()
+                                )
+                        ))
+        );
 
         System.out.println("Chatten är igång! Skriv 'quit' för att avsluta.\n");
-        while(true) {
+        while (true) {
             String input = IO.readln("You: ");
-            if( "quit".equals(input) )
+            if ("quit".equals(input))
                 break;
 
-            history.add(new Message("user",input));
+            history.add(new Message("user", input));
 
-            var requestBody = mapper.writeValueAsString(new Request(MODEL, history, null));
+            var requestBody = mapper.writeValueAsString(new Request(MODEL, history, tools));
 
             // Skapa HTTP-förfrågan
             HttpRequest request = HttpRequest.newBuilder()
@@ -54,13 +64,34 @@ public class AIAgent {
             String reply = or.choices().getFirst().message().content();
             IO.println("Assistant: " + reply);
 
-            history.add(new Message("assistant",reply));
+            history.add(new Message("assistant", reply));
         }
     }
 }
 
-record Request(String model, List<Message> messages, @Nullable Object tools) {}
-record Message(String role, String content) {}
-record OpenRouterResponse(List<Choice> choices) {}
-record Choice(int index, MessageResponse message) {}
-record MessageResponse(String role, String content) {}
+record Request(String model, List<Message> messages, List<Tool> tools) {
+}
+
+record Tool(String type, ToolFunctionSpec function) {
+}
+
+record ToolFunctionSpec(String name, String description, Map<String, Object> parameters) {
+}
+
+record Message(String role, String content) {
+}
+
+record OpenRouterResponse(List<Choice> choices) {
+}
+
+record Choice(int index, MessageResponse message, String finish_reason) {
+}
+
+record MessageResponse(String role, String content, List<ToolCall> tool_calls) {
+}
+
+record ToolCall(String id, String type, ToolFunction function) {
+}
+
+record ToolFunction(String name, String arguments) {
+}

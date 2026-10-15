@@ -3,6 +3,7 @@ package com.example.java26.exercises.week8;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public class CountryAndCities {
@@ -112,13 +113,87 @@ public class CountryAndCities {
         //Grouping by and counting
         var result = getCountries().stream()
                 .collect(Collectors.groupingBy(c -> c.countryName().charAt(0), Collectors.counting()));
+
         result.entrySet().stream()
                 .sorted(Comparator.comparing(Map.Entry::getKey))  //Just to print everything in order
                 .forEach(IO::println);
+        IO.println("=====");
+        //Exercise 15
+        var pop = getCountries().stream()
+                .collect(Collectors.groupingBy(c -> Math.floor(c.population()), TreeMap::new, Collectors.toList()));
+
+        pop.forEach(
+                (key, value) -> IO.println(key + " miljoner: " + value.stream().map(Country::countryName).collect(Collectors.joining(", "))));
 
         IO.println("=====");
+        //Exercise 16a
+        record NameAndPopulation(String name, long population) {
+            static NameAndPopulation of(Country c) {
+                return new NameAndPopulation(c.countryName(),
+                        Math.round(c.population() * 1_000_000));
+            }
+        }
 
+        getCountries().stream()
+                .map(NameAndPopulation::of)
+                .forEach(IO::println);
+        IO.println("=====");
+        record NameAndDensity(String name, double density){
+            static NameAndDensity of(Country c) {
+                return new NameAndDensity(c.countryName(), c.population() * 1_000_000 / c.area());
+            }
+        }
+        getCountries().stream()
+                .map(NameAndDensity::of)
+                .sorted(Comparator.comparing(NameAndDensity::density))
+                .forEach(nd -> IO.println(String.format("%s, %.2f",nd.name(), nd.density() )));
+        IO.println("=====");
+        //Exercise 17
+        getCountries().stream()
+                .sorted(Comparator.comparing(c->new StringBuilder(c.countryName()).reverse()))
+                .forEach(IO::println);
 
+        IO.println("=====");
+        //Exercise18
+        var minTotal = getCountries().stream()
+                .sorted(Comparator.comparing(Country::population))
+                .limit(6)
+                .mapToDouble(Country::population)
+                .sum();
+        var maxTotal = getCountries().stream()
+                .sorted(Comparator.comparing(Country::population).reversed())
+                .limit(3)
+                .mapToDouble(Country::population)
+                .sum();
+        IO.println("6 smallest countries: " + minTotal);
+        IO.println("3 biggest countries: " + maxTotal);
+        IO.println("=====");
+        System.out.println("Total population for countries with 7 letters " + getCountries().stream()
+                .filter(c -> c.countryName.length() == 7)
+                //.peek(System.out::println)
+                .mapToDouble(Country::population)
+                .sum());
+        IO.println("=====");
+        IO.println(getCountries().stream()
+                .anyMatch(c -> c.population() > 80.0));
+        IO.println("=====");
+
+        /**
+         * Exercise 21:Mitten-flattning / Sammanslagning med flatMap (Om listan utökas)
+         */
+        IO.println("Exercise 21:Mitten-flattning / Sammanslagning med flatMap (Om listan utökas)");
+        record CountryCities(String countryName, List<String> cities) { //Eget record, Country har inga städer
+        }
+        List<CountryCities> landMedStader = List.of(
+                new CountryCities("Sverige", List.of("Stockholm", "Göteborg", "Malmö")),
+                new CountryCities("Norge", List.of("Oslo", "Bergen", "Trondheim")),
+                new CountryCities("Danmark", List.of("Köpenhamn", "Aarhus", "Odense")),
+                new CountryCities("Finland", List.of("Helsingfors", "Esbo", "Tammerfors")));
+
+        List<String> allaStader = landMedStader.stream()
+                .flatMap(c -> c.cities().stream()) //Varje land blir en stream av städer, flatMap slår ihop dem till en
+                .toList();
+        IO.println("Alla städer: " + allaStader);
     }
 
 

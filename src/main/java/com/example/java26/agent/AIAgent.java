@@ -16,6 +16,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 public class AIAgent {
@@ -63,6 +64,16 @@ public class AIAgent {
                                                 Map.of("type", "string",
                                                         "description", "Content of the file")),
                                         "required", List.of("path", "content")
+                                )
+                        )),
+                new Tool("function",
+                        new ToolFunctionSpec("list_directory",
+                                "List files and directories in a directory",
+                                Map.of("type", "object",
+                                        "properties", Map.of("path",
+                                                Map.of("type", "string",
+                                                        "description", "The directory path to list")),
+                                        "required", List.of("path")
                                 )
                         ))
         );
@@ -127,6 +138,21 @@ public class AIAgent {
                                 result = "File created";
                             } else
                                 result = "User denied creating the file.";
+                            String toolOutput = mapper.writeValueAsString(result);
+                            history.add(new Message("tool", toolOutput, toolCall.id()));
+                        } else if ("list_directory".equals(toolCall.function().name())) {
+                            Map<String, Object> arguments = mapper.readValue(toolCall.function().arguments(), Map.class);
+                            String pathStr = arguments.getOrDefault("path", ".").toString();
+                            Path path = Path.of(pathStr);
+                            String result = "";
+                            if (confirm("Tillåt att lista katalogen " + path)) {
+                                try (var stream = Files.list(path)) {
+                                    result = stream.map(p -> p.getFileName().toString() + (Files.isDirectory(p) ? "/" : ""))
+                                            .collect(Collectors.joining("\n"));
+                                }
+                            } else {
+                                result = "User denied listing the directory.";
+                            }
                             String toolOutput = mapper.writeValueAsString(result);
                             history.add(new Message("tool", toolOutput, toolCall.id()));
                         } else

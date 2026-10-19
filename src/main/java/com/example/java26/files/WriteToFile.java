@@ -1,6 +1,7 @@
 package com.example.java26.files;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,9 +22,9 @@ public class WriteToFile {
         IO.println("Is file: " + Files.isRegularFile(filePath));
         try {
             Files.createFile(filePath);
-        }catch(FileAlreadyExistsException e){
+        } catch (FileAlreadyExistsException e) {
             IO.println("File " + filePath + " already exists");
         }
-        Files.writeString(filePath, "I'm fine");
+        Files.writeString(filePath, "I'm fine åäö ûü", StandardCharsets.ISO_8859_1);
     }
 }

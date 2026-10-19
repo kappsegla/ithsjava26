@@ -49,51 +49,46 @@ public class AIAgent {
 
             history.add(new Message("user", input));
 
-            var requestBody = mapper.writeValueAsString(new Request(MODEL, history, tools));
+            while (true) {
 
-            // Skapa HTTP-förfrågan
-            HttpRequest request = HttpRequest.newBuilder()
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + API_KEY)
-                    .uri(URI.create(HOST + "/api/v1/chat/completions"))
-                    .build();
-
-            // Skicka och läs svar
-            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            OpenRouterResponse or = mapper.readValue(response.body(), OpenRouterResponse.class);
-
-            //Känn av om modellen vill köra ett verktyg
-            var choice = or.choices().get(0);
-            MessageResponse msg = choice.message();
-            String finish = choice.finish_reason();
-            if ("tool_calls".equals(finish)) {
-                IO.println("AI:n vill använda ett verktyg: " + msg.tool_calls());
-                history.add(new Message("assistant", msg.content(), null, msg.tool_calls()));
-                for (ToolCall toolCall : msg.tool_calls()) {
-                    if ("get_current_datetime".equals(toolCall.function().name())) {
-                        DateTimeResult result = getCurrentDateTime();
-                        String toolOutput = mapper.writeValueAsString(result);
-                        history.add(new Message("tool", toolOutput, toolCall.id()));
-                    }
-                }
-                //Send tool answer and get response. Will be refactored to another solution...
-                var followUpBody = new Request(MODEL, history, tools);
-                HttpRequest followUpRequest = HttpRequest.newBuilder()
-                        .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(followUpBody)))
+                var requestBody = mapper.writeValueAsString(new Request(MODEL, history, tools));
+                // Skapa HTTP-förfrågan
+                HttpRequest request = HttpRequest.newBuilder()
+                        .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                         .header("Content-Type", "application/json")
                         .header("Authorization", "Bearer " + API_KEY)
                         .uri(URI.create(HOST + "/api/v1/chat/completions"))
                         .build();
-                HttpResponse<String> followUpResponse = client.send(followUpRequest, HttpResponse.BodyHandlers.ofString());
-                OpenRouterResponse followUpOr = mapper.readValue(followUpResponse.body(), OpenRouterResponse.class);
-                String finalReply = followUpOr.choices().get(0).message().content();
-                IO.println("Assistant: " + finalReply);
-                history.add(new Message("assistant", finalReply));
-            } else {
-                String reply = msg.content();
-                IO.println("Assistant: " + reply);
-                history.add(new Message("assistant", reply));
+
+                // Skicka och läs svar
+                var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                OpenRouterResponse or = mapper.readValue(response.body(), OpenRouterResponse.class);
+
+                //Känn av om modellen vill köra ett verktyg
+                var choice = or.choices().get(0);
+                MessageResponse msg = choice.message();
+                String finish = choice.finish_reason();
+
+                if ("tool_calls".equals(finish)) {
+                    IO.println("AI:n vill använda ett verktyg: " + msg.tool_calls());
+
+                    history.add(new Message("assistant", msg.content(), null, msg.tool_calls()));
+
+                    for (ToolCall toolCall : msg.tool_calls()) {
+                        if ("get_current_datetime".equals(toolCall.function().name())) {
+                            DateTimeResult result = getCurrentDateTime();
+                            String toolOutput = mapper.writeValueAsString(result);
+                            history.add(new Message("tool", toolOutput, toolCall.id()));
+                        }
+                    }
+                } else if ("stop".equals(finish)) {
+                    String reply = msg.content();
+                    IO.println("Assistant: " + reply + "\n");
+                    history.add(new Message("assistant", reply));
+                    break;
+                } else {
+                    throw new IllegalStateException("Unexpected value: " + finish);
+                }
             }
         }
     }

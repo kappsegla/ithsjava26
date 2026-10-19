@@ -8,6 +8,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZoneOffset;
@@ -50,8 +51,20 @@ public class AIAgent {
                                                         "description", "The file path to read")),
                                         "required", List.of("path")
                                 )
+                        )),
+                new Tool("function",
+                        new ToolFunctionSpec("create_file",
+                                "Create a new file",
+                                Map.of("type", "object",
+                                        "properties", Map.of("path",
+                                                Map.of("type", "string",
+                                                        "description", "The file path to create"),
+                                                "content",
+                                                Map.of("type", "string",
+                                                        "description", "Content of the file")),
+                                        "required", List.of("path", "content")
+                                )
                         ))
-
         );
 
         System.out.println("Chatten är igång! Skriv 'quit' för att avsluta.\n");
@@ -103,6 +116,19 @@ public class AIAgent {
                                 result = "User denied access to the file.";
                             String toolOutput = mapper.writeValueAsString(result);
                             history.add(new Message("tool", toolOutput, toolCall.id()));
+                        } else if ("create_file".equals(toolCall.function().name())) {
+                            Map<String, Object> arguments = mapper.readValue(toolCall.function().arguments(), Map.class);
+                            String pathStr = arguments.get("path").toString();
+                            Path path = Path.of(pathStr);
+                            String result = "";
+                            if (confirm("Tillåt att skapa/skriva över " + path)) {
+                                Files.createDirectories(path.getParent());
+                                Files.writeString(path, arguments.get("content").toString());
+                                result = "File created";
+                            } else
+                                result = "User denied creating the file.";
+                            String toolOutput = mapper.writeValueAsString(result);
+                            history.add(new Message("tool", toolOutput, toolCall.id()));
                         } else
                             IO.println("Unknown tool requested: " + toolCall.function().name());
                     }
@@ -113,6 +139,7 @@ public class AIAgent {
                     break;
                 } else {
                     throw new IllegalStateException("Unexpected value: " + finish);
+
                 }
             }
         }

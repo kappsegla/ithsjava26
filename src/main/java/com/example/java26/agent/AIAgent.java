@@ -8,6 +8,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -38,7 +40,18 @@ public class AIAgent {
                                         "properties", Map.of(),
                                         "required", List.of()
                                 )
+                        )),
+                new Tool("function",
+                        new ToolFunctionSpec("view_file",
+                                "Read file contents",
+                                Map.of("type", "object",
+                                        "properties", Map.of("path",
+                                                Map.of("type", "string",
+                                                        "description", "The file path to read")),
+                                        "required", List.of("path")
+                                )
                         ))
+
         );
 
         System.out.println("Chatten är igång! Skriv 'quit' för att avsluta.\n");
@@ -79,11 +92,23 @@ public class AIAgent {
                             DateTimeResult result = getCurrentDateTime();
                             String toolOutput = mapper.writeValueAsString(result);
                             history.add(new Message("tool", toolOutput, toolCall.id()));
-                        }
+                        } else if ("view_file".equals(toolCall.function().name())) {
+                            Map<String, Object> arguments = mapper.readValue(toolCall.function().arguments(), Map.class);
+                            String pathStr = arguments.get("path").toString();
+                            Path path = Path.of(pathStr);
+                            String result = "";
+                            if (confirm("Tillåt att " + path + " läses."))
+                                result = Files.readString(path);
+                            else
+                                result = "User denied access to the file.";
+                            String toolOutput = mapper.writeValueAsString(result);
+                            history.add(new Message("tool", toolOutput, toolCall.id()));
+                        } else
+                            IO.println("Unknown tool requested: " + toolCall.function().name());
                     }
                 } else if ("stop".equals(finish)) {
                     String reply = msg.content();
-                    IO.println("Assistant: " + reply + "\n");
+                    IO.println("Assistant: " + reply);
                     history.add(new Message("assistant", reply));
                     break;
                 } else {
@@ -91,6 +116,13 @@ public class AIAgent {
                 }
             }
         }
+    }
+
+    private static boolean confirm(String question) {
+        String answer = IO.readln(question + " (j/n): ")
+                .trim()
+                .toLowerCase();
+        return answer.equals("j") || answer.equals("ja");
     }
 
     private static DateTimeResult getCurrentDateTime() {

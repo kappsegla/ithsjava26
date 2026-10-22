@@ -25,6 +25,6 @@ public class WriteToFile {
         } catch (FileAlreadyExistsException e) {
             IO.println("File " + filePath + " already exists");
         }
-        Files.writeString(filePath, "I'm fine åäö ûü", StandardCharsets.ISO_8859_1);
+        Files.writeString(filePath, "I'm fine åäö ûü");
     }
 }

@@ -8,6 +8,11 @@ import java.net.http.HttpResponse;
 
 public class Main {
     static void main() {
+
+        //To use ca certs from operating system in windows
+        //Add VM option -Djavax.net.ssl.trustStoreType=WINDOWS-ROOT
+        //Should be fine if updating to Oracle JDK 27.0.1.0.2
+
         try (HttpClient httpClient = HttpClient.newHttpClient()){
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://dv-g3b-emudhra.we-have-a-problem.com"))

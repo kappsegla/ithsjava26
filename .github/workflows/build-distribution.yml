@@ -48,7 +48,6 @@ jobs:
         MODULES=$(jdeps --print-module-deps target/ithsjava26-1.0-SNAPSHOT.jar)
         jlink --add-modules "$MODULES" \
               --output jre \
-              --no-manifest \
               --strip-debug \
               --compress=2
 
@@ -57,7 +56,7 @@ jobs:
       shell: pwsh
       run: |
         $modules = jdeps --print-module-deps target\ithsjava26-1.0-SNAPSHOT.jar
-        jlink --add-modules $modules --output jre --no-manifest --strip-debug --compress=2
+        jlink --add-modules $modules --output jre --strip-debug --compress=2
 
     - name: Create distribution (Linux/Mac)
       if: matrix.os != 'windows-latest'

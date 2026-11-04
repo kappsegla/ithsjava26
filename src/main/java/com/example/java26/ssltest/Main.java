@@ -6,7 +6,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+
 public class Main {
+
     static void main() {
 
         //To use ca certs from operating system in windows

@@ -1,0 +1,97 @@
+# This workflow builds a custom JRE using jlink for HelloWorld and packages
+# runnable distributions for Windows, Linux, and macOS.
+
+name: Build Custom JRE Distribution
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build-distribution:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            archive-ext: tar.gz
+          - os: windows-latest
+            platform: windows
+            archive-ext: zip
+          - os: macos-latest
+            platform: mac
+            archive-ext: tar.gz
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 27
+      uses: actions/setup-java@v4
+      with:
+        java-version: '27'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Build JAR with Maven
+      run: mvn -B package -DskipTests --file pom.xml
+
+    - name: Analyze dependencies with jdeps
+      run: |
+        jdeps --print-module-deps target/ithsjava26-1.0-SNAPSHOT.jar > modules.txt
+        cat modules.txt
+
+    - name: Build custom JRE with jlink (Linux/Mac)
+      if: matrix.os != 'windows-latest'
+      run: |
+        MODULES=$(jdeps --print-module-deps target/ithsjava26-1.0-SNAPSHOT.jar)
+        jlink --add-modules "$MODULES" \
+              --output jre \
+              --no-manifest \
+              --strip-debug \
+              --compress=2
+
+    - name: Build custom JRE with jlink (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: pwsh
+      run: |
+        $modules = jdeps --print-module-deps target\ithsjava26-1.0-SNAPSHOT.jar
+        jlink --add-modules $modules --output jre --no-manifest --strip-debug --compress=2
+
+    - name: Create distribution (Linux/Mac)
+      if: matrix.os != 'windows-latest'
+      run: |
+        mkdir -p dist/helloworld
+        cp target/ithsjava26-1.0-SNAPSHOT.jar dist/helloworld/
+        cp -r jre dist/helloworld/
+        cat > dist/helloworld/run.sh << 'EOF'
+        #!/bin/bash
+        DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+        "$DIR/jre/bin/java" -jar "$DIR/ithsjava26-1.0-SNAPSHOT.jar" "$@"
+        EOF
+        chmod +x dist/helloworld/run.sh
+        cd dist && tar -czf "helloworld-${{ matrix.platform }}.tar.gz" helloworld/
+
+    - name: Create distribution (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: pwsh
+      run: |
+        New-Item -ItemType Directory -Path dist\helloworld -Force
+        Copy-Item target\ithsjava26-1.0-SNAPSHOT.jar dist\helloworld\
+        Copy-Item -Recurse jre dist\helloworld\
+        @"
+        @echo off
+        setlocal
+        set "DIR=%~dp0"
+        "%DIR%jre\bin\java.exe" -jar "%DIR%ithsjava26-1.0-SNAPSHOT.jar" %*
+        "@ | Out-File -FilePath dist\helloworld\run.bat -Encoding ASCII
+        Set-Location dist
+        Compress-Archive -Path helloworld -DestinationPath "helloworld-${{ matrix.platform }}.zip"
+
+    - name: Upload distribution artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: helloworld-${{ matrix.platform }}
+        path: |
+          dist/helloworld-${{ matrix.platform }}.${{ matrix.archive-ext }}

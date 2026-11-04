@@ -1,7 +1,7 @@
 package com.example.java26;
 
 public class HelloWorld {
-    static void main() {
-        IO.println(System.getProperty("stdin.encoding"));
+    public static void main(String[] args) {
+        System.out.println("Hello World!");
     }
 }

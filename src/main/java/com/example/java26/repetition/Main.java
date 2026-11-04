@@ -3,9 +3,7 @@ package com.example.java26.repetition;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Main {
 
@@ -30,6 +28,32 @@ public class Main {
 
         Storage<Person> storage = new Storage<>(p);
         Storage<String> stringStorage = new Storage<>("Hello World");
+
+        List<String> strings = new ArrayList<>();
+        List<String> immutableStrings = List.of("Hello", "World");
+        //immutableStrings.add("Hello");  //Throws UnsupportedException
+        immutableStrings.stream()
+                .filter(s -> !s.equals("Hello"))
+                .forEach(IO::println);
+
+        IO.println(maybeAValue().orElse("Standard value for empty optional"));
+        IO.println(maybeAValue().orElse("Standard value for empty optional"));
+        IO.println(maybeAValue().orElse("Standard value for empty optional"));
+        IO.println(maybeAValue().orElse("Standard value for empty optional"));
+    }
+
+    public static Optional<String> maybeAValue() {
+        if (Math.random() < 0.5) {
+            return Optional.empty();
+        }
+        return Optional.of("A value");
+    }
+
+    public static List<String> maybeValues() {
+        if (Math.random() < 0.5) {
+            return List.of();
+        }
+        return List.of("A value", "Another value");
     }
 }
 

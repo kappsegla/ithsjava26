@@ -19,9 +19,9 @@ jobs:
           - os: windows-latest
             platform: windows
             archive-ext: zip
-          - os: macos-latest
-            platform: mac
-            archive-ext: tar.gz
+#          - os: macos-latest
+#            platform: mac
+#            archive-ext: tar.gz
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -67,15 +67,15 @@ jobs:
       shell: pwsh
       run: |
         $jar = Get-ChildItem target\*.jar | Select-Object -First 1
-        echo "jar_path=${$jar.FullName}" >> $env:GITHUB_OUTPUT
-        echo "Found JAR: ${$jar.FullName}"
+        echo "jar_path=$($jar.FullName)" >> $env:GITHUB_OUTPUT
+        echo "Found JAR: $($jar.FullName)"
 
     - name: Analyze dependencies with jdeps (Windows)
       if: matrix.os == 'windows-latest'
       shell: pwsh
       run: |
         $jar = '${{ steps.find-jar-windows.outputs.jar_path }}'
-        jdeps --print-module-deps $jar | Out-File -FilePath modules.txt
+        jdeps --print-module-deps "$jar" | Out-File -FilePath modules.txt
         Get-Content modules.txt
 
     - name: Build custom JRE with jlink (Windows)
@@ -83,8 +83,8 @@ jobs:
       shell: pwsh
       run: |
         $jar = '${{ steps.find-jar-windows.outputs.jar_path }}'
-        $modules = jdeps --print-module-deps $jar
-        jlink --add-modules $modules --output jre --strip-debug
+        $modules = jdeps --print-module-deps "$jar"
+        jlink --add-modules "$modules" --output jre --strip-debug
 
     - name: Create distribution (Linux/Mac)
       if: matrix.os != 'windows-latest'
@@ -109,7 +109,7 @@ jobs:
         $jar = '${{ steps.find-jar-windows.outputs.jar_path }}'
         $jarName = Split-Path $jar -Leaf
         New-Item -ItemType Directory -Path dist\helloworld -Force
-        Copy-Item $jar dist\helloworld\
+        Copy-Item "$jar" dist\helloworld\
         Copy-Item -Recurse jre dist\helloworld\
         @"
         @echo off
@@ -126,4 +126,4 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         files: dist/helloworld-${{ matrix.platform }}.${{ matrix.archive-ext }}
-        fail_on_error: false
+        fail_on_unmatched_files: false

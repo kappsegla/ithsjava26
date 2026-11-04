@@ -59,8 +59,7 @@ jobs:
         MODULES=$(jdeps --print-module-deps "$JAR")
         jlink --add-modules "$MODULES" \
               --output jre \
-              --strip-debug \
-              --compress=zip
+              --strip-debug
 
     - name: Find JAR file (Windows)
       if: matrix.os == 'windows-latest'
@@ -85,7 +84,7 @@ jobs:
       run: |
         $jar = '${{ steps.find-jar-windows.outputs.jar_path }}'
         $modules = jdeps --print-module-deps $jar
-        jlink --add-modules $modules --output jre --strip-debug --compress=zip
+        jlink --add-modules $modules --output jre --strip-debug
 
     - name: Create distribution (Linux/Mac)
       if: matrix.os != 'windows-latest'

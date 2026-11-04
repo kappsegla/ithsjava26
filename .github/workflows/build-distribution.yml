@@ -2,7 +2,7 @@ name: Build Custom JRE Distribution
 
 on:
   release:
-    types: [ published ]
+    types: [published]
 
 permissions:
   contents: write
@@ -10,12 +10,19 @@ permissions:
 jobs:
   build-distribution:
     strategy:
+      fail-fast: false
       matrix:
         include:
-          - { os: ubuntu-latest,  platform: linux,   ext: tar.gz }
-          - { os: windows-latest, platform: windows, ext: zip }
-    #         - { os: macos-latest,   platform: mac,     ext: tar.gz }
+          - { os: ubuntu-latest,    platform: linux,   arch: x64,   ext: tar.gz }
+          - { os: ubuntu-24.04-arm, platform: linux,   arch: arm64, ext: tar.gz }
+          - { os: windows-latest,   platform: windows, arch: x64,   ext: zip }
+          - { os: windows-11-arm,   platform: windows, arch: arm64, ext: zip }
+    #         - { os: macos-26-intel,   platform: mac,     arch: x64,   ext: tar.gz }
+    #         - { os: macos-latest,     platform: mac,     arch: arm64, ext: tar.gz }
+    # https://docs.github.com/en/actions/reference/runners/github-hosted-runners#standard-github-hosted-runners-for-public-repositories
     runs-on: ${{ matrix.os }}
+    env:
+      ARCHIVE: helloworld-${{ matrix.platform }}-${{ matrix.arch }}
     defaults:
       run:
         shell: bash
@@ -37,23 +44,22 @@ jobs:
           MODULES=$(jdeps --print-module-deps "$JAR" | tr -d '\r')
           echo "Found JAR: $JAR"
           echo "Modules: $MODULES"
-          jlink --add-modules "$MODULES" --output jre --strip-debug
           mkdir -p dist/helloworld
+          jlink --add-modules "$MODULES" --output dist/helloworld/jre --strip-debug
           cp "$JAR" dist/helloworld/app.jar
-          cp -r jre dist/helloworld/
 
       - name: Create distribution
         run: |
           cd dist
           if [ "${{ runner.os }}" = "Windows" ]; then
             printf '@echo off\r\n"%%~dp0jre\\bin\\java.exe" -jar "%%~dp0app.jar" %%*\r\n' > helloworld/run.bat
-            7z a helloworld-${{ matrix.platform }}.zip helloworld
+            7z a "$ARCHIVE.zip" helloworld
           else
             printf '#!/bin/bash\nDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"\n"$DIR/jre/bin/java" -jar "$DIR/app.jar" "$@"\n' > helloworld/run.sh
             chmod +x helloworld/run.sh
-            tar -czf helloworld-${{ matrix.platform }}.tar.gz helloworld
+            tar -czf "$ARCHIVE.tar.gz" helloworld
           fi
 
       - uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
-          files: dist/helloworld-${{ matrix.platform }}.${{ matrix.ext }}
+          files: dist/${{ env.ARCHIVE }}.${{ matrix.ext }}

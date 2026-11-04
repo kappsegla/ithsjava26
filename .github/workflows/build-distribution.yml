@@ -16,9 +16,7 @@ jobs:
           - { os: ubuntu-latest,    platform: linux,   arch: x64,   ext: tar.gz }
           - { os: ubuntu-24.04-arm, platform: linux,   arch: arm64, ext: tar.gz }
           - { os: windows-latest,   platform: windows, arch: x64,   ext: zip }
-          - { os: windows-11-arm,   platform: windows, arch: arm64, ext: zip }
-    #         - { os: macos-26-intel,   platform: mac,     arch: x64,   ext: tar.gz }
-    #         - { os: macos-latest,     platform: mac,     arch: arm64, ext: tar.gz }
+          - { os: macos-latest,     platform: mac,     arch: arm64, ext: tar.gz }
     # https://docs.github.com/en/actions/reference/runners/github-hosted-runners#standard-github-hosted-runners-for-public-repositories
     runs-on: ${{ matrix.os }}
     env:

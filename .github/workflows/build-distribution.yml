@@ -1,12 +1,8 @@
-# This workflow builds a custom JRE using jlink for HelloWorld and packages
-# runnable distributions for Windows, Linux, and macOS.
-
 name: Build Custom JRE Distribution
 
 on:
   release:
-    types: [published]
-  workflow_dispatch:
+    types: [ published ]
 
 permissions:
   contents: write
@@ -16,117 +12,48 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
-            platform: linux
-            archive-ext: tar.gz
-          - os: windows-latest
-            platform: windows
-            archive-ext: zip
-#          - os: macos-latest
-#            platform: mac
-#            archive-ext: tar.gz
+          - { os: ubuntu-latest,  platform: linux,   ext: tar.gz }
+          - { os: windows-latest, platform: windows, ext: zip }
+    #         - { os: macos-latest,   platform: mac,     ext: tar.gz }
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
 
     steps:
-    - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
 
-    - name: Set up JDK 27
-      uses: actions/setup-java@v6
-      with:
-        java-version: '27'
-        distribution: 'temurin'
-        cache: maven
+      - uses: actions/setup-java@v6
+        with:
+          java-version: '27'
+          distribution: 'temurin'
+          cache: maven
 
-    - name: Build JAR with Maven
-      run: mvn -B package -DskipTests --file pom.xml
+      - run: mvn -B package -DskipTests
 
-    - name: Find JAR file (Linux/Mac)
-      if: matrix.os != 'windows-latest'
-      id: find-jar-linux
-      run: |
-        JAR=$(ls target/*.jar | head -1)
-        echo "jar_path=$JAR" >> $GITHUB_OUTPUT
-        echo "Found JAR: $JAR"
+      - name: Build custom JRE with jlink
+        run: |
+          JAR=$(ls target/*.jar | head -1)
+          MODULES=$(jdeps --print-module-deps "$JAR" | tr -d '\r')
+          echo "Found JAR: $JAR"
+          echo "Modules: $MODULES"
+          jlink --add-modules "$MODULES" --output jre --strip-debug
+          mkdir -p dist/helloworld
+          cp "$JAR" dist/helloworld/app.jar
+          cp -r jre dist/helloworld/
 
-    - name: Analyze dependencies with jdeps (Linux/Mac)
-      if: matrix.os != 'windows-latest'
-      run: |
-        JAR=${{ steps.find-jar-linux.outputs.jar_path }}
-        jdeps --print-module-deps "$JAR" > modules.txt
-        cat modules.txt
+      - name: Create distribution
+        run: |
+          cd dist
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            printf '@echo off\r\n"%%~dp0jre\\bin\\java.exe" -jar "%%~dp0app.jar" %%*\r\n' > helloworld/run.bat
+            7z a helloworld-${{ matrix.platform }}.zip helloworld
+          else
+            printf '#!/bin/bash\nDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"\n"$DIR/jre/bin/java" -jar "$DIR/app.jar" "$@"\n' > helloworld/run.sh
+            chmod +x helloworld/run.sh
+            tar -czf helloworld-${{ matrix.platform }}.tar.gz helloworld
+          fi
 
-    - name: Build custom JRE with jlink (Linux/Mac)
-      if: matrix.os != 'windows-latest'
-      run: |
-        JAR=${{ steps.find-jar-linux.outputs.jar_path }}
-        MODULES=$(jdeps --print-module-deps "$JAR")
-        jlink --add-modules "$MODULES" \
-              --output jre \
-              --strip-debug
-
-    - name: Find JAR file (Windows)
-      if: matrix.os == 'windows-latest'
-      id: find-jar-windows
-      shell: pwsh
-      run: |
-        $jar = Get-ChildItem target\*.jar | Select-Object -First 1
-        echo "jar_path=$($jar.FullName)" >> $env:GITHUB_OUTPUT
-        echo "Found JAR: $($jar.FullName)"
-
-    - name: Analyze dependencies with jdeps (Windows)
-      if: matrix.os == 'windows-latest'
-      shell: pwsh
-      run: |
-        $jar = '${{ steps.find-jar-windows.outputs.jar_path }}'
-        jdeps --print-module-deps "$jar" | Out-File -FilePath modules.txt
-        Get-Content modules.txt
-
-    - name: Build custom JRE with jlink (Windows)
-      if: matrix.os == 'windows-latest'
-      shell: pwsh
-      run: |
-        $jar = '${{ steps.find-jar-windows.outputs.jar_path }}'
-        $modules = jdeps --print-module-deps "$jar"
-        jlink --add-modules "$modules" --output jre --strip-debug
-
-    - name: Create distribution (Linux/Mac)
-      if: matrix.os != 'windows-latest'
-      run: |
-        JAR=${{ steps.find-jar-linux.outputs.jar_path }}
-        JAR_NAME=$(basename "$JAR")
-        mkdir -p dist/helloworld
-        cp "$JAR" dist/helloworld/
-        cp -r jre dist/helloworld/
-        cat > dist/helloworld/run.sh << EOF
-        #!/bin/bash
-        DIR="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
-        "\$DIR/jre/bin/java" -jar "\$DIR/$JAR_NAME" "\$@"
-        EOF
-        chmod +x dist/helloworld/run.sh
-        cd dist && tar -czf "helloworld-${{ matrix.platform }}.tar.gz" helloworld/
-
-    - name: Create distribution (Windows)
-      if: matrix.os == 'windows-latest'
-      shell: pwsh
-      run: |
-        $jar = '${{ steps.find-jar-windows.outputs.jar_path }}'
-        $jarName = Split-Path $jar -Leaf
-        New-Item -ItemType Directory -Path dist\helloworld -Force
-        Copy-Item "$jar" dist\helloworld\
-        Copy-Item -Recurse jre dist\helloworld\
-        @"
-        @echo off
-        setlocal
-        set "DIR=%~dp0"
-        "%DIR%jre\bin\java.exe" -jar "%DIR%$jarName" %*
-        "@ | Out-File -FilePath dist\helloworld\run.bat -Encoding ASCII
-        Set-Location dist
-        Compress-Archive -Path helloworld -DestinationPath "helloworld-${{ matrix.platform }}.zip"
-
-    - name: Upload to GitHub Release
-      uses: softprops/action-gh-release@v3
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        files: dist/helloworld-${{ matrix.platform }}.${{ matrix.archive-ext }}
-        fail_on_unmatched_files: false
+      - uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        with:
+          files: dist/helloworld-${{ matrix.platform }}.${{ matrix.ext }}

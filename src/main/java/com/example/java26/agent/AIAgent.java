@@ -10,17 +10,18 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class AIAgent {
     private static final String HOST = "https://openrouter.ai";
     private static final String MODEL = "google/gemini-3.8-flash";
+    //private static final String MODEL = "deepseek/deepseek-v4.1-flash";
 
     public static void main(String[] args) throws IOException, InterruptedException {
         final String API_KEY = System.getenv("OPENROUTER_API_KEY");
@@ -28,51 +29,44 @@ public class AIAgent {
         HttpClient client = HttpClient.newHttpClient();
         ObjectMapper mapper = new ObjectMapper();
 
-        List<Message> history = new ArrayList<>();
+        String instructions = "Svara kort. Max 2 meningar.";
+        Reasoning reasoning = new Reasoning("medium");
+        List<InputItem> history = new ArrayList<>();
 
-        history.add(new Message("system", "Svara kort. Max 2 meningar."));
-        //Create tool list
+        //Create tool list (flat format for Responses API)
         List<Tool> tools = List.of(
-                new Tool("function",
-                        new ToolFunctionSpec("get_current_datetime",
-                                "Returns the current date and time in UTC",
-                                Map.of("type", "object",
-                                        "properties", Map.of(),
-                                        "required", List.of()
-                                )
+                new Tool("function", "get_current_datetime",
+                        "Returns the current date and time in UTC",
+                        Map.of("type", "object",
+                                "properties", Map.of(),
+                                "required", List.of()
                         )),
-                new Tool("function",
-                        new ToolFunctionSpec("view_file",
-                                "Read file contents",
-                                Map.of("type", "object",
-                                        "properties", Map.of("path",
-                                                Map.of("type", "string",
-                                                        "description", "The file path to read")),
-                                        "required", List.of("path")
-                                )
+                new Tool("function", "view_file",
+                        "Read file contents",
+                        Map.of("type", "object",
+                                "properties", Map.of("path",
+                                        Map.of("type", "string",
+                                                "description", "The file path to read")),
+                                "required", List.of("path")
                         )),
-                new Tool("function",
-                        new ToolFunctionSpec("create_file",
-                                "Create a new file",
-                                Map.of("type", "object",
-                                        "properties", Map.of("path",
-                                                Map.of("type", "string",
-                                                        "description", "The file path to create"),
-                                                "content",
-                                                Map.of("type", "string",
-                                                        "description", "Content of the file")),
-                                        "required", List.of("path", "content")
-                                )
+                new Tool("function", "create_file",
+                        "Create a new file",
+                        Map.of("type", "object",
+                                "properties", Map.of("path",
+                                        Map.of("type", "string",
+                                                "description", "The file path to create"),
+                                        "content",
+                                        Map.of("type", "string",
+                                                "description", "Content of the file")),
+                                "required", List.of("path", "content")
                         )),
-                new Tool("function",
-                        new ToolFunctionSpec("list_directory",
-                                "List files and directories in a directory",
-                                Map.of("type", "object",
-                                        "properties", Map.of("path",
-                                                Map.of("type", "string",
-                                                        "description", "The directory path to list")),
-                                        "required", List.of("path")
-                                )
+                new Tool("function", "list_directory",
+                        "List files and directories in a directory",
+                        Map.of("type", "object",
+                                "properties", Map.of("path",
+                                        Map.of("type", "string",
+                                                "description", "The directory path to list")),
+                                "required", List.of("path")
                         ))
         );
 
@@ -82,90 +76,120 @@ public class AIAgent {
             if ("quit".equals(input))
                 break;
 
-            history.add(new Message("user", input));
+            history.add(InputItem.message("user", input));
 
-            while (true) {
+            try {
+                while (true) {
+                    var requestBody = mapper.writeValueAsString(new Request(MODEL, instructions, history, tools, reasoning));
+                    // Skapa HTTP-förfrågan
+                    HttpRequest request = HttpRequest.newBuilder()
+                            .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                            .header("Content-Type", "application/json")
+                            .header("Authorization", "Bearer " + API_KEY)
+                            .uri(URI.create(HOST + "/api/v1/responses"))
+                            .build();
 
-                var requestBody = mapper.writeValueAsString(new Request(MODEL, history, tools));
-                // Skapa HTTP-förfrågan
-                HttpRequest request = HttpRequest.newBuilder()
-                        .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                        .header("Content-Type", "application/json")
-                        .header("Authorization", "Bearer " + API_KEY)
-                        .uri(URI.create(HOST + "/api/v1/chat/completions"))
-                        .build();
+                    // Skicka och läs svar med felhantering och retry
+                    Response or = sendWithRetry(client, request, mapper);
 
-                // Skicka och läs svar
-                var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                OpenRouterResponse or = mapper.readValue(response.body(), OpenRouterResponse.class);
+                    // Kolla output array för function_call items eller message items
+                    boolean hasFunctionCall = false;
 
-                //Känn av om modellen vill köra ett verktyg
-                var choice = or.choices().get(0);
-                MessageResponse msg = choice.message();
-                String finish = choice.finish_reason();
+                    for (OutputItem item : or.output()) {
+                        if ("function_call".equals(item.type())) {
+                            hasFunctionCall = true;
+                            IO.println("AI:n vill använda ett verktyg: " + item.name() + " (" + item.id() + ")");
 
-                if ("tool_calls".equals(finish)) {
-                    IO.println("AI:n vill använda ett verktyg: " + msg.tool_calls());
+                            // Lägg till function_call item i historiken
+                            history.add(InputItem.functionCall(
+                                    item.id(), item.call_id(), item.name(), item.arguments()));
 
-                    history.add(new Message("assistant", msg.content(), null, msg.tool_calls()));
-
-                    for (ToolCall toolCall : msg.tool_calls()) {
-                        if ("get_current_datetime".equals(toolCall.function().name())) {
-                            DateTimeResult result = getCurrentDateTime();
-                            String toolOutput = mapper.writeValueAsString(result);
-                            history.add(new Message("tool", toolOutput, toolCall.id()));
-                        } else if ("view_file".equals(toolCall.function().name())) {
-                            Map<String, Object> arguments = mapper.readValue(toolCall.function().arguments(), Map.class);
-                            String pathStr = arguments.get("path").toString();
-                            Path path = Path.of(pathStr);
-                            String result = "";
-                            if (confirm("Tillåt att " + path + " läses."))
-                                result = Files.readString(path);
-                            else
-                                result = "User denied access to the file.";
-                            String toolOutput = mapper.writeValueAsString(result);
-                            history.add(new Message("tool", toolOutput, toolCall.id()));
-                        } else if ("create_file".equals(toolCall.function().name())) {
-                            Map<String, Object> arguments = mapper.readValue(toolCall.function().arguments(), Map.class);
-                            String pathStr = arguments.get("path").toString();
-                            Path path = Path.of(pathStr);
-                            String result = "";
-                            if (confirm("Tillåt att skapa/skriva över " + path)) {
-                                Files.createDirectories(path.getParent());
-                                Files.writeString(path, arguments.get("content").toString());
-                                result = "File created";
-                            } else
-                                result = "User denied creating the file.";
-                            String toolOutput = mapper.writeValueAsString(result);
-                            history.add(new Message("tool", toolOutput, toolCall.id()));
-                        } else if ("list_directory".equals(toolCall.function().name())) {
-                            Map<String, Object> arguments = mapper.readValue(toolCall.function().arguments(), Map.class);
-                            String pathStr = arguments.getOrDefault("path", ".").toString();
-                            Path path = Path.of(pathStr);
-                            String result = "";
-                            if (confirm("Tillåt att lista katalogen " + path)) {
-                                try (var stream = Files.list(path)) {
-                                    result = stream.map(p -> p.getFileName().toString() + (Files.isDirectory(p) ? "/" : ""))
-                                            .collect(Collectors.joining("\n"));
-                                }
-                            } else {
-                                result = "User denied listing the directory.";
-                            }
-                            String toolOutput = mapper.writeValueAsString(result);
-                            history.add(new Message("tool", toolOutput, toolCall.id()));
-                        } else
-                            IO.println("Unknown tool requested: " + toolCall.function().name());
+                            // Kör verktyget och lägg till resultat
+                            String toolOutput = runTool(item.name(), item.arguments(), mapper);
+                            history.add(InputItem.functionCallOutput(item.call_id(), toolOutput));
+                        }
                     }
-                } else if ("stop".equals(finish)) {
-                    String reply = msg.content();
-                    IO.println("Assistant: " + reply);
-                    history.add(new Message("assistant", reply));
-                    break;
-                } else {
-                    throw new IllegalStateException("Unexpected value: " + finish);
 
+                    if (hasFunctionCall) {
+                        continue;
+                    }
+
+                    // Hitta message item och extrahera text
+                    for (OutputItem item : or.output()) {
+                        if ("message".equals(item.type()) && item.content() != null) {
+                            StringBuilder reply = new StringBuilder();
+                            for (OutputContentPart part : item.content()) {
+                                if ("output_text".equals(part.type())) {
+                                    reply.append(part.text());
+                                }
+                            }
+                            if (reply.length() > 0) {
+                                IO.println("Assistant: " + reply);
+                                history.add(InputItem.message("assistant", reply.toString()));
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                }
+            } catch (ApiException e) {
+                IO.println("[Fel] " + e.code() + ": " + e.getMessage() + " (HTTP " + e.statusCode() + ")");
+                if (e.isRetryable()) {
+                    IO.println("Försök igen med en ny fråga.");
+                } else {
+                    IO.println("Kontrollera API-nyckeln eller kontot och försök igen.");
+                }
+                // Ta bort det misslyckade meddelandet från historiken
+                if (!history.isEmpty()) {
+                    history.remove(history.size() - 1);
                 }
             }
+        }
+    }
+
+    private static String runTool(String name, String argumentsJson, ObjectMapper mapper)
+            throws IOException {
+        Map<String, Object> arguments = mapper.readValue(argumentsJson, Map.class);
+        switch (name) {
+            case "get_current_datetime": {
+                DateTimeResult result = getCurrentDateTime();
+                return mapper.writeValueAsString(result);
+            }
+            case "view_file": {
+                String pathStr = arguments.get("path").toString();
+                Path path = Path.of(pathStr);
+                if (confirm("Tillåt att " + path + " läses."))
+                    return mapper.writeValueAsString(Files.readString(path));
+                else
+                    return mapper.writeValueAsString("User denied access to the file.");
+            }
+            case "create_file": {
+                String pathStr = arguments.get("path").toString();
+                Path path = Path.of(pathStr);
+                if (confirm("Tillåt att skapa/skriva över " + path)) {
+                    Files.createDirectories(path.getParent());
+                    Files.writeString(path, arguments.get("content").toString());
+                    return mapper.writeValueAsString("File created");
+                } else
+                    return mapper.writeValueAsString("User denied creating the file.");
+            }
+            case "list_directory": {
+                String pathStr = arguments.getOrDefault("path", ".").toString();
+                Path path = Path.of(pathStr);
+                if (confirm("Tillåt att lista katalogen " + path)) {
+                    try (var stream = Files.list(path)) {
+                        String result = stream
+                                .map(p -> p.getFileName().toString() + (Files.isDirectory(p) ? "/" : ""))
+                                .collect(Collectors.joining("\n"));
+                        return mapper.writeValueAsString(result);
+                    }
+                } else {
+                    return mapper.writeValueAsString("User denied listing the directory.");
+                }
+            }
+            default:
+                IO.println("Unknown tool requested: " + name);
+                return mapper.writeValueAsString("Unknown tool: " + name);
         }
     }
 
@@ -180,42 +204,159 @@ public class AIAgent {
         var now = ZonedDateTime.now(ZoneOffset.UTC);
         return new DateTimeResult(now.toString(), "UTC");
     }
+
+    private static Response sendWithRetry(HttpClient client, HttpRequest request, ObjectMapper mapper)
+            throws IOException, InterruptedException {
+        int maxRetries = 3;
+        Duration baseDelay = Duration.ofSeconds(2);
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            int status = response.statusCode();
+
+            // HTTP 200 – försök pars som normal response
+            if (status == 200) {
+                try {
+                    return mapper.readValue(response.body(), Response.class);
+                } catch (Exception e) {
+                    // Response var inte en giltig Response – kolla om det är ett fel
+                    ApiError error = mapper.readValue(response.body(), ApiErrorResponse.class).error();
+                    throw new ApiException(error.code(), error.message(), status);
+                }
+            }
+
+            // HTTP-fel – pars strukturerat fel
+            ApiError error;
+            try {
+                error = mapper.readValue(response.body(), ApiErrorResponse.class).error();
+            } catch (Exception e) {
+                throw new ApiException("unknown", response.body(), status);
+            }
+
+            // 429 Rate limit – retry med exponential backoff
+            if (status == 429 || "rate_limit_exceeded".equals(error.code())) {
+                if (attempt < maxRetries) {
+                    long retryAfter = parseRetryAfter(response);
+                    long delayMs = retryAfter > 0 ? retryAfter * 1000 : baseDelay.toMillis() * (1L << (attempt - 1));
+                    IO.println("[Varning] Rate limit nådd. Väntar " + (delayMs / 1000) + "s innan ny försök...");
+                    Thread.sleep(delayMs);
+                    continue;
+                }
+            }
+
+            // 5xx server-fel – retry med exponential backoff
+            if (status >= 500) {
+                if (attempt < maxRetries) {
+                    long delayMs = baseDelay.toMillis() * (1L << (attempt - 1));
+                    IO.println("[Varning] Serverfel (" + status + "). Väntar " + (delayMs / 1000) + "s innan ny försök...");
+                    Thread.sleep(delayMs);
+                    continue;
+                }
+            }
+
+            // 401, 402, 403, 408, 400 – icke-återhämtbara fel, bryt direkt
+            throw new ApiException(error.code(), error.message(), status);
+        }
+
+        throw new ApiException("max_retries", "Maximalt antal försök uppnåddes", 429);
+    }
+
+    private static long parseRetryAfter(HttpResponse<String> response) {
+        try {
+            String retryAfter = response.headers().map().getOrDefault("Retry-After", List.of()).stream().findFirst().orElse("");
+            return retryAfter.isEmpty() ? 0 : Long.parseLong(retryAfter);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
 }
 
 record DateTimeResult(String now, String timezone) {
 }
 
-record Request(String model, List<Message> messages, List<Tool> tools) {
+record Tool(String type, String name, String description, Map<String, Object> parameters) {
 }
 
-record Tool(String type, ToolFunctionSpec function) {
-}
+// --- Request data models for /api/v1/responses ---
 
-record ToolFunctionSpec(String name, String description, Map<String, Object> parameters) {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+record Request(String model, String instructions, List<InputItem> input, List<Tool> tools, Reasoning reasoning) {
 }
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-record Message(String role, String content, String tool_call_id, List<ToolCall> tool_calls) {
-    public Message(String role, String content, String tool_call_id) {
-        this(role, content, tool_call_id, null);
+record Reasoning(String effort) {
+}
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+record InputItem(String type, String role, List<ContentPart> content,
+                 String id, String call_id, String name, String arguments,
+                 String output) {
+    // Message item: type="message", role, content
+    public static InputItem message(String role, String text) {
+        return new InputItem("message", role, List.of(new ContentPart("input_text", text)),
+                             null, null, null, null, null);
     }
 
-    public Message(String role, String content) {
-        this(role, content, null, null);
+    // Function call item: type="function_call", id, call_id, name, arguments
+    public static InputItem functionCall(String id, String callId, String name, String arguments) {
+        return new InputItem("function_call", null, null,
+                             id, callId, name, arguments, null);
+    }
+
+    // Function call output item: type="function_call_output", call_id, output
+    public static InputItem functionCallOutput(String callId, String output) {
+        return new InputItem("function_call_output", null, null,
+                             null, callId, null, null, output);
     }
 }
 
-record OpenRouterResponse(List<Choice> choices) {
+record ContentPart(String type, String text) {
 }
 
-record Choice(int index, MessageResponse message, String finish_reason) {
+// --- Response data models for /api/v1/responses ---
+
+record Response(String id, List<OutputItem> output, Usage usage) {
 }
 
-record MessageResponse(String role, String content, List<ToolCall> tool_calls) {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+record OutputItem(String type, String id, String role, String status,
+                  List<OutputContentPart> content,
+                  String call_id, String name, String arguments) {
 }
 
-record ToolCall(String id, String type, ToolFunction function) {
+record OutputContentPart(String type, String text) {
 }
 
-record ToolFunction(String name, String arguments) {
+record Usage(int input_tokens, int output_tokens, int total_tokens) {
+}
+
+// --- Error handling data models ---
+
+record ApiErrorResponse(ApiError error, Object metadata) {
+}
+
+record ApiError(String code, String message) {
+}
+
+class ApiException extends RuntimeException {
+    private final String code;
+    private final int statusCode;
+
+    public ApiException(String code, String message, int statusCode) {
+        super(message);
+        this.code = code;
+        this.statusCode = statusCode;
+    }
+
+    public String code() {
+        return code;
+    }
+
+    public int statusCode() {
+        return statusCode;
+    }
+
+    public boolean isRetryable() {
+        return statusCode == 429 || statusCode >= 500;
+    }
 }

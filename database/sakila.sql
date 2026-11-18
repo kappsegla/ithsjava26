@@ -59,3 +59,9 @@ with aggregated_data as (select first_name, count(first_name)
                          having count(first_name) > 1)
 select count(*)
 from aggregated_data;
+delete from rental where rental_id = 31;
+
+select * from rental limit 10;  -- 12-21
+select * from rental limit 10 offset 10; -- 22-31
+select * from rental where rental_id > 21 limit 10;
+select * from rental where rental_id > 31 limit 10;

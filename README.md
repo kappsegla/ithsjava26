@@ -1,2 +1,1 @@
 # Rubrik
-Text

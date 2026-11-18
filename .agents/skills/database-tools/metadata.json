@@ -1,0 +1,5 @@
+{
+  "name": "database-tools",
+  "description": "Use when the user wants to query, browse, or manage SQL databases — listing schemas, inspecting tables, previewing data, or running SQL queries.",
+  "version": "1.0.0"
+}

@@ -22,13 +22,19 @@ public class AIAgent {
     static final ObjectMapper MAPPER = JsonMapper.builder().build();
     static final HttpClient CLIENT = HttpClient.newHttpClient();
 
-    static final String INSTRUCTIONS = "Svara kort. Max 2 meningar.";
+    static final String INSTRUCTIONS = "Svara kort. Max 2 meningar. Försök inte läsa filer om det inte ingår i uppgiften.";
     static final List<Tool> TOOLS = new ArrayList<>();
     static final Map<String, McpClient> servers = new HashMap<>();
 
     public static void main(String[] args) throws Exception {
         addServer("weather", new McpClient(
                 List.of("java", "-cp", "./lib/*", "./src/main/java/com/example/java26/agent/Weather.java"), Map.of()));
+        addServer("sql", new McpClient(
+                List.of("java", "-cp", "./lib/*", "./src/main/java/com/example/java26/agent/Sql.java"),
+                Map.of("MYSQL_URL", "jdbc:mysql//localhost:3306/sakila",
+                        "MYSQL_USER", "root",
+                        "MYSQL_PASSWORD","secret")
+        ));
 
         TOOLS.add(tool("get_current_datetime", "Returns the current date and time in UTC",
                 Map.of()));

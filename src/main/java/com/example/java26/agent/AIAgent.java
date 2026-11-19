@@ -8,9 +8,12 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class AIAgent {
     static final String HOST = "https://openrouter.ai";
@@ -19,8 +22,18 @@ public class AIAgent {
     static final HttpClient CLIENT = HttpClient.newHttpClient();
 
     static final String INSTRUCTIONS = "Svara kort. Max 2 meningar.";
+    static final List<Tool> TOOLS = new ArrayList<>();
 
     public static void main(String[] args) throws Exception {
+        TOOLS.add(tool("get_current_datetime", "Returns the current date and time in UTC",
+                Map.of()));
+        TOOLS.add(tool("view_file", "Read file contents",
+                Map.of("path", str("The file path to read")), "path"));
+        TOOLS.add(tool("list_directory", "List files in a directory",
+                Map.of("path", str("Directory path")), "path"));
+        TOOLS.add(tool("create_file", "Create a new file",
+                Map.of("path", str("The file path to create"), "content", str("Content of the file")), "path", "content"));
+
         var history = new ArrayList<InputItem>();
         IO.println("Chatten är igång! Skriv 'quit' för att avsluta.");
         while (true) {
@@ -90,9 +103,6 @@ public class AIAgent {
         }
     }
 
-    static final List<Tool> TOOLS = new ArrayList<>(List.of(
-            new Tool("function", "get_current_datetime", "Returns the current date and time in UTC",
-                    Map.of("type", "object", "properties", Map.of(), "required", List.of()))));
 
     // kör ett verktyg. fel går tillbaka till modellen som text i stället för att krascha loopen
     static String runTool(String name, String argumentsJson) {
@@ -110,11 +120,44 @@ public class AIAgent {
         switch (name) {
             case "get_current_datetime":
                 return java.time.ZonedDateTime.now(java.time.ZoneOffset.UTC).toString();
+            case "view_file": {
+                Path p = Path.of(arguments.get("path").toString());
+                if (!confirm("Tillåt att " + p + " läses.")) return "User denied access to the file.";
+                return Files.readString(p);
+            }
+            case "list_directory": {
+                Path p = Path.of(arguments.getOrDefault("path", ".").toString());
+                if (!confirm("Tillåt att lista katalogen " + p)) return "User denied listing the directory.";
+                try (var s = Files.list(p)) {
+                    return s.map(x -> x.getFileName() + (Files.isDirectory(x) ? "/" : ""))
+                            .collect(Collectors.joining("\n"));
+                }
+            }
+            case "create_file": {
+                Path p = Path.of(arguments.get("path").toString());
+                if (!confirm("Tillåt att skapa/skriva över " + p)) return "User denied creating the file.";
+                if (p.getParent() != null) Files.createDirectories(p.getParent());
+                Files.writeString(p, arguments.get("content").toString());
+                return "File created";
+            }
             default:
                 return "Unknown tool: " + name;
         }
     }
 
+    static Tool tool(String name, String desc, Map<String, Object> props, String... required) {
+        return new Tool("function", name, desc,
+                Map.of("type", "object", "properties", props, "required", List.of(required)));
+    }
+
+    static Map<String, Object> str(String desc) {
+        return Map.of("type", "string", "description", desc);
+    }
+
+    static boolean confirm(String question) {
+        String a = IO.readln(question + " (j/n): ").trim().toLowerCase();
+        return a.equals("j") || a.equals("ja");
+    }
 }
 
 // ersätter Request, lägger till InputItem och ContentPart

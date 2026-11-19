@@ -11,6 +11,7 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,8 +24,12 @@ public class AIAgent {
 
     static final String INSTRUCTIONS = "Svara kort. Max 2 meningar.";
     static final List<Tool> TOOLS = new ArrayList<>();
+    static final Map<String, McpClient> servers = new HashMap<>();
 
     public static void main(String[] args) throws Exception {
+        addServer("weather", new McpClient(
+                List.of("java", "-cp", "./lib/*", "./src/main/java/com/example/java26/agent/Weather.java"), Map.of()));
+
         TOOLS.add(tool("get_current_datetime", "Returns the current date and time in UTC",
                 Map.of()));
         TOOLS.add(tool("view_file", "Read file contents",
@@ -103,6 +108,14 @@ public class AIAgent {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    static void addServer(String prefix, McpClient c) throws Exception {
+        servers.put(prefix, c);
+        for (var t : c.listTools())
+            TOOLS.add(new Tool("function", prefix + "_" + t.get("name").asString(),
+                    t.path("description").asString(""),
+                    MAPPER.convertValue(t.get("inputSchema"), Map.class)));
+    }
 
     // kör ett verktyg. fel går tillbaka till modellen som text i stället för att krascha loopen
     static String runTool(String name, String argumentsJson) {
@@ -140,8 +153,13 @@ public class AIAgent {
                 Files.writeString(p, arguments.get("content").toString());
                 return "File created";
             }
-            default:
-                return "Unknown tool: " + name;
+            default: {
+                int i = name.indexOf('_');                    // prefix_verktyg → rätt MCP-server
+                McpClient c = i > 0 ? servers.get(name.substring(0, i)) : null;
+                if (c == null) return "Unknown tool: " + name;
+                if (!confirm("Tillåt MCP-anrop " + name + " " + argumentsJson)) return "User denied the call.";
+                return c.callTool(name.substring(i + 1), arguments);
+            }
         }
     }
 

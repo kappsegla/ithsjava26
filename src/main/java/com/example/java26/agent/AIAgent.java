@@ -31,9 +31,9 @@ public class AIAgent {
                 List.of("java", "-cp", "./lib/*", "./src/main/java/com/example/java26/agent/Weather.java"), Map.of()));
         addServer("sql", new McpClient(
                 List.of("java", "-cp", "./lib/*", "./src/main/java/com/example/java26/agent/Sql.java"),
-                Map.of("MYSQL_URL", "jdbc:mysql//localhost:3306/sakila",
-                        "MYSQL_USER", "root",
-                        "MYSQL_PASSWORD","secret")
+                Map.of("MYSQL_URL", "jdbc:mysql://localhost:3306/sakila",
+                        "MYSQL_USER", "mcp_readonly",
+                        "MYSQL_PASSWORD","hemligt")
         ));
 
         TOOLS.add(tool("get_current_datetime", "Returns the current date and time in UTC",

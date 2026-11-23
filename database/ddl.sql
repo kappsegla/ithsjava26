@@ -41,20 +41,43 @@ create table book
     foreign key (author_id) references author (id)
 );
 insert into book(isbn, title, release_date, author_id)
-values ('9789189942745', 'Ropet från rymden', '2026-10-07', 3),
-       ('9789153110170', 'Bakom nissedörren', '2024-10-24', 4);
+values ('9789189942744', 'Ropet från rymden', '2026-10-07', null),
+       ('9789153110175', 'Bakom nissedörren', '2024-10-24', null);
 select *
 from book;
 insert into book(isbn, title, release_date, author_id)
     value ('6547890546723', 'Test test test', '2018-05-13', null);
 
-select isbn, title, first_name, last_name
+select isbn, title, author_id,first_name, last_name
 from book
-         join author
+       left join author
+    on book.author_id = author.id;
+
+select isbn, title, first_name, last_name
+from book,
+     author
 where book.author_id = author.id;
+
+
 delete
 from author
-where id = 3;
+where id = 6;
 delete
 from book
 where id = 1;
+
+-- Lock book table for writes during updating the constraints
+lock tables book read;
+
+show create table book;
+
+alter table book
+    drop foreign key book_ibfk_1;
+
+alter table book
+    add constraint
+        foreign key (author_id)
+            references author (id)
+            on delete cascade;
+
+unlock tables;

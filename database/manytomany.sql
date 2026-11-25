@@ -38,11 +38,16 @@ values (1, 1),
        (2, 2),
        (2, 3);
 -- Retrieve authors for the book with title Test
-select author.first_name, author.last_name
+select book.id, book.title, author.first_name, author.last_name
 from author
          join book_author on author.id = book_author.author_id
-         join book on book_author.book_id = book.id
-where book.title = 'Test';
+         join book on book_author.book_id = book.id;
+-- where book.title = 'Test';
+create view book_and_author as
+select book.id, book.title, author.first_name, author.last_name
+from author
+         join book_author on author.id = book_author.author_id
+         join book on book_author.book_id = book.id;
 
 -- Above query step by step with select, no joins
 select *
@@ -54,3 +59,28 @@ where book_id = 1;
 select *
 from author
 where id in (1, 2);
+
+select author.id, author.first_name, count(book_author.book_id)
+from author
+         join book_author on author.id = book_author.author_id
+         join book on book_author.book_id = book.id
+group by author.id;
+
+-- Create view
+create view author_book_count as
+select author.id, author.first_name, count(book_author.book_id)
+from author
+         join book_author on author.id = book_author.author_id
+         join book on book_author.book_id = book.id
+group by author.id;
+
+select *
+from author_book_count;
+
+select *
+from book_and_author
+where last_name = 'Gyllenkrok';
+
+update book_and_author
+set title = 'New Title'
+where id = 1;

@@ -78,9 +78,15 @@ select *
 from author_book_count;
 
 select *
-from book_and_author
-where last_name = 'Gyllenkrok';
+from book_and_author;
 
 update book_and_author
 set title = 'New Title'
 where id = 1;
+
+select book.id, book.title, GROUP_CONCAT(CONCAT(author.first_name, ' ', author.last_name)
+                                         SEPARATOR ', ') AS names
+from author
+         join book_author on author.id = book_author.author_id
+         join book on book_author.book_id = book.id
+group by book.id;

@@ -69,3 +69,25 @@ create table anmalning (
                              constraint fk_anmalningar_kurs foreign key (kurs_id) references kurs (kurs_id),
                              constraint fk_anmalningar_student foreign key (student_id) references student (student_id)
 );
+
+-- Anomalies when not properly normalized
+create table student_course(
+    studentId int,
+    name varchar(255),
+    course varchar(255)
+);
+
+insert into student_course(studentId, name, course) value (1,'Anna','Database');
+insert into student_course(studentId, name, course) value (1,'Anna','Java');
+
+select * from student_course;
+-- Anomaly update, multiple rows need to be updated but we might miss some
+update student_course
+set name = 'Anna Svensson'
+where studentId = 1;
+
+-- Insert anomaly  no course name saved with the student
+insert into student_course(studentId, name) value(2, 'Erik');
+
+-- Delete anomaly  removes the course name also
+delete from student_course where name = 'Anna';

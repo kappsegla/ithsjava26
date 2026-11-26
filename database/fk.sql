@@ -18,8 +18,33 @@ create table dog
     id       int primary key auto_increment,
     name     varchar(255),
     owner_id int,
+    data     json,
     foreign key (owner_id) references person (id)
 );
 -- Lägg till en hund
-insert into dog(name, owner_id)
-    value ('Buster', 1);
+insert into dog(name, owner_id, data)
+    value ('Buster', 1,
+           '{
+             "color": "black",
+             "rase": "labrador",
+             "age": 7,
+             "chipped": true
+           }');
+insert into dog(name, owner_id, data)
+    value ('Maja', 2,
+           '{
+             "age": 2,
+             "chipped": false
+           }');
+--
+select * from dog
+where data->'$.chipped' = false;
+
+select * from dog
+where data->'$.color' = 'black';
+
+select * from dog
+where json_contains_path(data,'one', '$.color') = 1;
+
+update dog set data = json_set(data, '$.chipped', true)
+where id = 2;

@@ -23,9 +23,7 @@ begin
             set message_text = 'start_at must be in the future and before end_at';
     end if;
 end$$
-
 delimiter ;
-
 
 insert into booking(guests, promo_code) value (2, null);
 insert into booking(guests, promo_code) value (-1, null);

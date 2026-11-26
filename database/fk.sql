@@ -18,7 +18,29 @@ create table dog
     id       int primary key auto_increment,
     name     varchar(255),
     owner_id int,
-    data     json,
+    data     json check( json_schema_valid('{
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "color": {
+          "type": "string"
+        },
+        "rase": {
+          "type": "string"
+        },
+        "age": {
+          "type": "integer"
+        },
+        "chipped": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "age",
+        "chipped"
+      ],
+      "additionalProperties": false
+    }', data)),
     foreign key (owner_id) references person (id)
 );
 -- Lägg till en hund
@@ -48,3 +70,32 @@ where json_contains_path(data,'one', '$.color') = 1;
 
 update dog set data = json_set(data, '$.chipped', true)
 where id = 2;
+
+select * from dog;
+
+set @schema = '{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "color": {
+      "type": "string"
+    },
+    "rase": {
+      "type": "string"
+    },
+    "age": {
+      "type": "integer"
+    },
+    "chipped": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "age",
+    "chipped"
+  ]
+}';
+
+show tables;
+describe dog;
+show create table dog;
